@@ -1,0 +1,618 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3367954E2E40756700DE8B39 /* MetalPetal in Frameworks */ = {isa = PBXBuildFile; productRef = 3367954D2E40756700DE8B39 /* MetalPetal */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		336795082E406A7000DE8B39 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 336794E92E406A6E00DE8B39 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 336794F02E406A6E00DE8B39;
+			remoteInfo = MultipleImageBlendUsingMetal;
+		};
+		336795122E406A7000DE8B39 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 336794E92E406A6E00DE8B39 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 336794F02E406A6E00DE8B39;
+			remoteInfo = MultipleImageBlendUsingMetal;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		336794F12E406A6E00DE8B39 /* MultipleImageBlendUsingMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultipleImageBlendUsingMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		336795072E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultipleImageBlendUsingMetalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		336795112E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultipleImageBlendUsingMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		336795192E406A7000DE8B39 /* Exceptions for "MultipleImageBlendUsingMetal" folder in "MultipleImageBlendUsingMetal" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 336794F02E406A6E00DE8B39 /* MultipleImageBlendUsingMetal */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		336794F32E406A6E00DE8B39 /* MultipleImageBlendUsingMetal */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				336795192E406A7000DE8B39 /* Exceptions for "MultipleImageBlendUsingMetal" folder in "MultipleImageBlendUsingMetal" target */,
+			);
+			path = MultipleImageBlendUsingMetal;
+			sourceTree = "<group>";
+		};
+		3367950A2E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MultipleImageBlendUsingMetalTests;
+			sourceTree = "<group>";
+		};
+		336795142E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MultipleImageBlendUsingMetalUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		336794EE2E406A6E00DE8B39 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3367954E2E40756700DE8B39 /* MetalPetal in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		336795042E406A7000DE8B39 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3367950E2E406A7000DE8B39 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		336794E82E406A6E00DE8B39 = {
+			isa = PBXGroup;
+			children = (
+				336794F32E406A6E00DE8B39 /* MultipleImageBlendUsingMetal */,
+				3367950A2E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests */,
+				336795142E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests */,
+				3367954C2E40756700DE8B39 /* Frameworks */,
+				336794F22E406A6E00DE8B39 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		336794F22E406A6E00DE8B39 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				336794F12E406A6E00DE8B39 /* MultipleImageBlendUsingMetal.app */,
+				336795072E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests.xctest */,
+				336795112E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3367954C2E40756700DE8B39 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		336794F02E406A6E00DE8B39 /* MultipleImageBlendUsingMetal */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3367951A2E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetal" */;
+			buildPhases = (
+				336794ED2E406A6E00DE8B39 /* Sources */,
+				336794EE2E406A6E00DE8B39 /* Frameworks */,
+				336794EF2E406A6E00DE8B39 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				336794F32E406A6E00DE8B39 /* MultipleImageBlendUsingMetal */,
+			);
+			name = MultipleImageBlendUsingMetal;
+			packageProductDependencies = (
+				3367954D2E40756700DE8B39 /* MetalPetal */,
+			);
+			productName = MultipleImageBlendUsingMetal;
+			productReference = 336794F12E406A6E00DE8B39 /* MultipleImageBlendUsingMetal.app */;
+			productType = "com.apple.product-type.application";
+		};
+		336795062E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3367951F2E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetalTests" */;
+			buildPhases = (
+				336795032E406A7000DE8B39 /* Sources */,
+				336795042E406A7000DE8B39 /* Frameworks */,
+				336795052E406A7000DE8B39 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				336795092E406A7000DE8B39 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				3367950A2E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests */,
+			);
+			name = MultipleImageBlendUsingMetalTests;
+			packageProductDependencies = (
+			);
+			productName = MultipleImageBlendUsingMetalTests;
+			productReference = 336795072E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		336795102E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 336795222E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetalUITests" */;
+			buildPhases = (
+				3367950D2E406A7000DE8B39 /* Sources */,
+				3367950E2E406A7000DE8B39 /* Frameworks */,
+				3367950F2E406A7000DE8B39 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				336795132E406A7000DE8B39 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				336795142E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests */,
+			);
+			name = MultipleImageBlendUsingMetalUITests;
+			packageProductDependencies = (
+			);
+			productName = MultipleImageBlendUsingMetalUITests;
+			productReference = 336795112E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		336794E92E406A6E00DE8B39 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					336794F02E406A6E00DE8B39 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					336795062E406A7000DE8B39 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 336794F02E406A6E00DE8B39;
+					};
+					336795102E406A7000DE8B39 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = 336794F02E406A6E00DE8B39;
+					};
+				};
+			};
+			buildConfigurationList = 336794EC2E406A6E00DE8B39 /* Build configuration list for PBXProject "MultipleImageBlendUsingMetal" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 336794E82E406A6E00DE8B39;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				336795282E40717400DE8B39 /* XCRemoteSwiftPackageReference "MetalPetal" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 336794F22E406A6E00DE8B39 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				336794F02E406A6E00DE8B39 /* MultipleImageBlendUsingMetal */,
+				336795062E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests */,
+				336795102E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		336794EF2E406A6E00DE8B39 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		336795052E406A7000DE8B39 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3367950F2E406A7000DE8B39 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		336794ED2E406A6E00DE8B39 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		336795032E406A7000DE8B39 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3367950D2E406A7000DE8B39 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		336795092E406A7000DE8B39 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 336794F02E406A6E00DE8B39 /* MultipleImageBlendUsingMetal */;
+			targetProxy = 336795082E406A7000DE8B39 /* PBXContainerItemProxy */;
+		};
+		336795132E406A7000DE8B39 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 336794F02E406A6E00DE8B39 /* MultipleImageBlendUsingMetal */;
+			targetProxy = 336795122E406A7000DE8B39 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3367951B2E406A7000DE8B39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U8DK4S4CV4;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(HEADER_SEARCH_PATHS)";
+				INFOPLIST_FILE = MultipleImageBlendUsingMetal/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				"MTL_HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(HEADER_SEARCH_PATHS)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.baraincraftltd.MultipleImageBlendUsingMetal;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		3367951C2E406A7000DE8B39 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U8DK4S4CV4;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(HEADER_SEARCH_PATHS)";
+				INFOPLIST_FILE = MultipleImageBlendUsingMetal/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				"MTL_HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(HEADER_SEARCH_PATHS)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.baraincraftltd.MultipleImageBlendUsingMetal;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		3367951D2E406A7000DE8B39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(HEADER_SEARCH_PATHS)";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3367951E2E406A7000DE8B39 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(HEADER_SEARCH_PATHS)";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		336795202E406A7000DE8B39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U8DK4S4CV4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.baraincraftltd.MultipleImageBlendUsingMetalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MultipleImageBlendUsingMetal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MultipleImageBlendUsingMetal";
+			};
+			name = Debug;
+		};
+		336795212E406A7000DE8B39 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U8DK4S4CV4;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.baraincraftltd.MultipleImageBlendUsingMetalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MultipleImageBlendUsingMetal.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MultipleImageBlendUsingMetal";
+			};
+			name = Release;
+		};
+		336795232E406A7000DE8B39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U8DK4S4CV4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.baraincraftltd.MultipleImageBlendUsingMetalUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MultipleImageBlendUsingMetal;
+			};
+			name = Debug;
+		};
+		336795242E406A7000DE8B39 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = U8DK4S4CV4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.baraincraftltd.MultipleImageBlendUsingMetalUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MultipleImageBlendUsingMetal;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		336794EC2E406A6E00DE8B39 /* Build configuration list for PBXProject "MultipleImageBlendUsingMetal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3367951D2E406A7000DE8B39 /* Debug */,
+				3367951E2E406A7000DE8B39 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3367951A2E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetal" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3367951B2E406A7000DE8B39 /* Debug */,
+				3367951C2E406A7000DE8B39 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3367951F2E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetalTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				336795202E406A7000DE8B39 /* Debug */,
+				336795212E406A7000DE8B39 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		336795222E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetalUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				336795232E406A7000DE8B39 /* Debug */,
+				336795242E406A7000DE8B39 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		336795282E40717400DE8B39 /* XCRemoteSwiftPackageReference "MetalPetal" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/MetalPetal/MetalPetal.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.25.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3367954D2E40756700DE8B39 /* MetalPetal */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 336795282E40717400DE8B39 /* XCRemoteSwiftPackageReference "MetalPetal" */;
+			productName = MetalPetal;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 336794E92E406A6E00DE8B39 /* Project object */;
+}
