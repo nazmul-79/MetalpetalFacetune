@@ -8,8 +8,6 @@
 import UIKit
 import MetalPetal
 
-import UIKit
-import MetalPetal
 
 class EyeBrowZoomFilter: NSObject, MTIFilter {
 

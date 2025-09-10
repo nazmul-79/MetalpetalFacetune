@@ -66,6 +66,12 @@ struct JawFilterModel {
     var scaleFactor: CGFloat = 0
 }
 
+struct LipsBrightenFilterModel {
+    var outerPoints: [SIMD2<Float>] = []
+    var innerPoints: [SIMD2<Float>] = []
+    var scaleFactor: CGFloat = 0
+}
+
 struct FacePropotionModel {
     var faceRect: CGRect = .zero
     var faceCenter: SIMD2<Float> = .zero
@@ -100,6 +106,7 @@ struct FaceTuneFilterModel {
     var eyelashFilterModel: EyelashFilterModel = .init()
     var eyeBrightnessFilterModel: EyeBrightnessFilterModel = .init()
     var teethWhiteningModel: TeethWhiteningFilterModel = .init()
+    var lipsBrighterModel: LipsBrightenFilterModel = .init()
     var imageSize: CGSize = .zero
     let allCat = FilteryType.allCases
     
@@ -180,6 +187,13 @@ struct FaceTuneFilterModel {
                 if teethWhiteningModel.scaleFactor != 0.0 {
                     outputImage = self.applyTeethWhiteningFilter(image: outputImage)
                 }
+            case .brighterLips:
+                if category == filterCategory {
+                    lipsBrighterModel.scaleFactor = CGFloat(scaleValue)
+                }
+                if lipsBrighterModel.scaleFactor != 0.0 {
+                    outputImage = self.applyLipsBrighterFilter(inputImage: outputImage)
+                }
             
             default: break
             }
@@ -188,26 +202,67 @@ struct FaceTuneFilterModel {
     }
 }
 
+//MARK: - FaceTuneFilterModel
 extension FaceTuneFilterModel {
-    mutating func updateTeethWhiteningFilter(innerLipsPoint: [CGPoint]) {
+    mutating func updateLipsBritherFilter(innerLipsPoint: [CGPoint], outerLipsPoint: [CGPoint]) {
+        let convertedPointsInnerLips = convertLandmarkPointsForImage(innerLipsPoint,
+                                                                     boundingBox: self.boundingBox,
+                                                                     imageSize: self.imageSize)
+        
+        let convertedOuterLips = convertLandmarkPointsForImage(outerLipsPoint,
+                                                               boundingBox: self.boundingBox,
+                                                               imageSize: self.imageSize)
+        
+        let normalizedPoints1 = convertedPointsInnerLips.map { point in
+            SIMD2<Float>(Float(point.x) / Float(imageSize.width),
+                         Float(point.y) / Float(imageSize.height))
+        }
+        
+        
+        let normalizedPoints2 = convertedOuterLips.map { point in
+            SIMD2<Float>(Float(point.x) / Float(imageSize.width),
+                         Float(point.y) / Float(imageSize.height))
+        }
+        
+        lipsBrighterModel.innerPoints = normalizedPoints1
+        lipsBrighterModel.outerPoints = normalizedPoints2
+        
+    }
+    
+    mutating func applyLipsBrighterFilter(inputImage: MTIImage) -> MTIImage {
+        let filter = LipsBrightenFilter()
+        filter.inputImage = inputImage.unpremultiplyingAlpha()
+        filter.innerLipsPoints = lipsBrighterModel.innerPoints
+        filter.outerLipsPoints = lipsBrighterModel.outerPoints
+        filter.outerBrightness = Float(lipsBrighterModel.scaleFactor)
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return inputImage
+    }
+}
+
+extension FaceTuneFilterModel {
+    mutating func updateTeethWhiteningFilter(innerLipsPoint: [CGPoint], size: CGSize) {
+        self.imageSize = size
         self.teethWhiteningModel.innerLipsPoints = innerLipsPoint
         self.teethWhiteningModel.scaleFactor = 0.0
-        let convertedPointsLips = convertLandmarkPointsForImage(innerLipsPoint,
+        /*let convertedPointsLips = convertLandmarkPointsForImage(innerLipsPoint,
                                                                 boundingBox: self.boundingBox,
-                                                                imageSize: self.imageSize)
+                                                                imageSize: self.imageSize)*/
         
         
         //let (lefteyeCenter, lefteyeRadiusX, lefteyeRadiusY) = calculateEyeEllipse(points: convertedPointsLips,
                                                                                  // imageSize: self.imageSize)
         
-        let (image,center,radius) = createInnerLipsMask1(points: convertedPointsLips, imageSize: self.imageSize)!
+        let (image,center,radius) = createInnerLipsMask1(points: innerLipsPoint, imageSize: self.imageSize)!
         
         teethWhiteningModel.innerLipsCenter = SIMD2<Float>(Float(center.x / self.imageSize.width),
                                             Float(center.y / self.imageSize.height))
         
         teethWhiteningModel.innerLipsRadius = SIMD2<Float>(Float(radius.width / self.imageSize.width),
                                                            Float(radius.height / self.imageSize.height))
-        //teethWhiteningModel.maskImage = self.createInnerLipsMask(points: convertedPointsLips, imageSize: self.imageSize)
+        //teethWhiteningModel.maskImage = self.createInnerLipsMask(points: innerLipsPoint, imageSize: self.imageSize)
         teethWhiteningModel.maskImage = image
 
     }
@@ -1129,10 +1184,10 @@ extension FaceTuneFilterModel {
         points: [CGPoint],
         imageSize: CGSize,
         padding: CGFloat = 0,
-        shrinkFactor: CGFloat = 1.0,
+        shrinkFactor: CGFloat = 0.95,
         verticalOffset: CGFloat = 0,
-        boundaryWidth: CGFloat = 3,
-        cornerRadius: CGFloat = 6.0
+        boundaryWidth: CGFloat = 0,
+        cornerRadius: CGFloat = 0.0
     ) -> (mask: MTIImage, center: CGPoint, radius: CGSize)? {
         guard points.count > 2 else { return nil }
 
@@ -1219,13 +1274,14 @@ extension FaceTuneFilterModel {
         let boundingBox = path.cgPath.boundingBox
         let center = CGPoint(x: boundingBox.midX, y: boundingBox.midY)
         let radius = CGSize(width: boundingBox.width / 2, height: boundingBox.height / 2)
+        
+        let ciimage = CIImage(cgImage: cgImage)
 
         // Convert to MTIImage
         let maskImage = MTIImage(cgImage: cgImage, options: [.SRGB: false], isOpaque: false).unpremultiplyingAlpha()
 
         return (mask: maskImage, center: center, radius: radius)
     }
-
 
 
 }

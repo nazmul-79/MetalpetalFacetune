@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B038D12B2D7729172B04653 /* Pods_MultipleImageBlendUsingMetal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 91F125CF7100C32F8B2231A5 /* Pods_MultipleImageBlendUsingMetal.framework */; };
+		263990A5F10F20E7C0337F31 /* Pods_MultipleImageBlendUsingMetal_MultipleImageBlendUsingMetalUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C4F107E4B9C772A828910421 /* Pods_MultipleImageBlendUsingMetal_MultipleImageBlendUsingMetalUITests.framework */; };
 		3367954E2E40756700DE8B39 /* MetalPetal in Frameworks */ = {isa = PBXBuildFile; productRef = 3367954D2E40756700DE8B39 /* MetalPetal */; };
+		888809CD39ECF86C7CCDF150 /* Pods_MultipleImageBlendUsingMetalTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A0E5778BE63E03F9EE4C3F2 /* Pods_MultipleImageBlendUsingMetalTests.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +34,15 @@
 		336794F12E406A6E00DE8B39 /* MultipleImageBlendUsingMetal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultipleImageBlendUsingMetal.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		336795072E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultipleImageBlendUsingMetalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		336795112E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MultipleImageBlendUsingMetalUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		76A25CE941D68BF2D8A032B2 /* Pods-MultipleImageBlendUsingMetalTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultipleImageBlendUsingMetalTests.release.xcconfig"; path = "Target Support Files/Pods-MultipleImageBlendUsingMetalTests/Pods-MultipleImageBlendUsingMetalTests.release.xcconfig"; sourceTree = "<group>"; };
+		7A0E5778BE63E03F9EE4C3F2 /* Pods_MultipleImageBlendUsingMetalTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MultipleImageBlendUsingMetalTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		81F5B27EB39C60227AE54884 /* Pods-MultipleImageBlendUsingMetal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultipleImageBlendUsingMetal.release.xcconfig"; path = "Target Support Files/Pods-MultipleImageBlendUsingMetal/Pods-MultipleImageBlendUsingMetal.release.xcconfig"; sourceTree = "<group>"; };
+		91F125CF7100C32F8B2231A5 /* Pods_MultipleImageBlendUsingMetal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MultipleImageBlendUsingMetal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C4F107E4B9C772A828910421 /* Pods_MultipleImageBlendUsingMetal_MultipleImageBlendUsingMetalUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MultipleImageBlendUsingMetal_MultipleImageBlendUsingMetalUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6EB1C64F97ADFA95B5BBFD5 /* Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.debug.xcconfig"; path = "Target Support Files/Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests/Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		CBDDB5427E71C98BEEF642A1 /* Pods-MultipleImageBlendUsingMetalTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultipleImageBlendUsingMetalTests.debug.xcconfig"; path = "Target Support Files/Pods-MultipleImageBlendUsingMetalTests/Pods-MultipleImageBlendUsingMetalTests.debug.xcconfig"; sourceTree = "<group>"; };
+		EFCEFFE47BEBDFE5EEF62B4C /* Pods-MultipleImageBlendUsingMetal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultipleImageBlendUsingMetal.debug.xcconfig"; path = "Target Support Files/Pods-MultipleImageBlendUsingMetal/Pods-MultipleImageBlendUsingMetal.debug.xcconfig"; sourceTree = "<group>"; };
+		FE0A6A0FBD6646A443B9B880 /* Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.release.xcconfig"; path = "Target Support Files/Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests/Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -70,6 +82,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3367954E2E40756700DE8B39 /* MetalPetal in Frameworks */,
+				1B038D12B2D7729172B04653 /* Pods_MultipleImageBlendUsingMetal.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +90,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				888809CD39ECF86C7CCDF150 /* Pods_MultipleImageBlendUsingMetalTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,6 +98,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				263990A5F10F20E7C0337F31 /* Pods_MultipleImageBlendUsingMetal_MultipleImageBlendUsingMetalUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +113,7 @@
 				336795142E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests */,
 				3367954C2E40756700DE8B39 /* Frameworks */,
 				336794F22E406A6E00DE8B39 /* Products */,
+				B16E900DE9E5CDBAFACFEBDE /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -114,8 +130,24 @@
 		3367954C2E40756700DE8B39 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				91F125CF7100C32F8B2231A5 /* Pods_MultipleImageBlendUsingMetal.framework */,
+				C4F107E4B9C772A828910421 /* Pods_MultipleImageBlendUsingMetal_MultipleImageBlendUsingMetalUITests.framework */,
+				7A0E5778BE63E03F9EE4C3F2 /* Pods_MultipleImageBlendUsingMetalTests.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B16E900DE9E5CDBAFACFEBDE /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EFCEFFE47BEBDFE5EEF62B4C /* Pods-MultipleImageBlendUsingMetal.debug.xcconfig */,
+				81F5B27EB39C60227AE54884 /* Pods-MultipleImageBlendUsingMetal.release.xcconfig */,
+				C6EB1C64F97ADFA95B5BBFD5 /* Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.debug.xcconfig */,
+				FE0A6A0FBD6646A443B9B880 /* Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.release.xcconfig */,
+				CBDDB5427E71C98BEEF642A1 /* Pods-MultipleImageBlendUsingMetalTests.debug.xcconfig */,
+				76A25CE941D68BF2D8A032B2 /* Pods-MultipleImageBlendUsingMetalTests.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -125,6 +157,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3367951A2E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetal" */;
 			buildPhases = (
+				5CA4154AF11E1479C0B10958 /* [CP] Check Pods Manifest.lock */,
 				336794ED2E406A6E00DE8B39 /* Sources */,
 				336794EE2E406A6E00DE8B39 /* Frameworks */,
 				336794EF2E406A6E00DE8B39 /* Resources */,
@@ -148,6 +181,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 3367951F2E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetalTests" */;
 			buildPhases = (
+				990D94A4E22E5780B67907B3 /* [CP] Check Pods Manifest.lock */,
 				336795032E406A7000DE8B39 /* Sources */,
 				336795042E406A7000DE8B39 /* Frameworks */,
 				336795052E406A7000DE8B39 /* Resources */,
@@ -161,8 +195,6 @@
 				3367950A2E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests */,
 			);
 			name = MultipleImageBlendUsingMetalTests;
-			packageProductDependencies = (
-			);
 			productName = MultipleImageBlendUsingMetalTests;
 			productReference = 336795072E406A7000DE8B39 /* MultipleImageBlendUsingMetalTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -171,6 +203,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 336795222E406A7000DE8B39 /* Build configuration list for PBXNativeTarget "MultipleImageBlendUsingMetalUITests" */;
 			buildPhases = (
+				289D30C9EAAB01A6EE379703 /* [CP] Check Pods Manifest.lock */,
 				3367950D2E406A7000DE8B39 /* Sources */,
 				3367950E2E406A7000DE8B39 /* Frameworks */,
 				3367950F2E406A7000DE8B39 /* Resources */,
@@ -184,8 +217,6 @@
 				336795142E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests */,
 			);
 			name = MultipleImageBlendUsingMetalUITests;
-			packageProductDependencies = (
-			);
 			productName = MultipleImageBlendUsingMetalUITests;
 			productReference = 336795112E406A7000DE8B39 /* MultipleImageBlendUsingMetalUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -261,6 +292,75 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		289D30C9EAAB01A6EE379703 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5CA4154AF11E1479C0B10958 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MultipleImageBlendUsingMetal-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		990D94A4E22E5780B67907B3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MultipleImageBlendUsingMetalTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		336794ED2E406A6E00DE8B39 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -301,6 +401,7 @@
 /* Begin XCBuildConfiguration section */
 		3367951B2E406A7000DE8B39 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = EFCEFFE47BEBDFE5EEF62B4C /* Pods-MultipleImageBlendUsingMetal.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -332,6 +433,7 @@
 		};
 		3367951C2E406A7000DE8B39 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 81F5B27EB39C60227AE54884 /* Pods-MultipleImageBlendUsingMetal.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -484,6 +586,7 @@
 		};
 		336795202E406A7000DE8B39 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CBDDB5427E71C98BEEF642A1 /* Pods-MultipleImageBlendUsingMetalTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -503,6 +606,7 @@
 		};
 		336795212E406A7000DE8B39 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 76A25CE941D68BF2D8A032B2 /* Pods-MultipleImageBlendUsingMetalTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -522,6 +626,7 @@
 		};
 		336795232E406A7000DE8B39 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C6EB1C64F97ADFA95B5BBFD5 /* Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -539,6 +644,7 @@
 		};
 		336795242E406A7000DE8B39 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FE0A6A0FBD6646A443B9B880 /* Pods-MultipleImageBlendUsingMetal-MultipleImageBlendUsingMetalUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

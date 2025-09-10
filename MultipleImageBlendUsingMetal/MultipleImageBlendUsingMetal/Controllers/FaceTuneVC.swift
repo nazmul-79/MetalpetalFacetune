@@ -517,12 +517,15 @@ extension FaceTuneVC {
                             self.faceTuneModel.updateLipsFilter(lipsPoints: outerLips)
                             let isTeeth = self.isTeethVisible(innerPoints: innerlips!)
                             
-                            innerlips!.insert(allpoint[26], at: 0)
-                            innerlips!.insert(allpoint[34], at: 4)
+                            //innerlips!.insert(allpoint[26], at: 0)
+                            //innerlips!.insert(allpoint[34], at: 4)
+                            
+                            self.faceTuneModel.updateLipsBritherFilter(innerLipsPoint: innerlips!,
+                                                                       outerLipsPoint: outerLips)
                             
                             self.faceTuneModel.updateJawFilter(jawPoints: selectedPoints)
                             self.faceTuneModel.updateFaceProportionFilter()
-                            self.faceTuneModel.updateTeethWhiteningFilter(innerLipsPoint: innerlips!)
+                            //self.faceTuneModel.updateTeethWhiteningFilter(innerLipsPoint: innerlips!)
                             
                             debugPrint("All Points111", isTeeth,innerlips!,outerLips, allpoint[45])
                             

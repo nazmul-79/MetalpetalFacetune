@@ -132,6 +132,14 @@ class ViewController: UIViewController {
     }
     
     
+    @IBAction func tappedOnFirebaseBtn(_ sender: UIButton) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let faceTuneVC = storyboard.instantiateViewController(withIdentifier: "FirebaseFaceTuneVC") as! FirebaseFaceTuneVC
+        faceTuneVC.modalPresentationStyle = .fullScreen
+        self.present(faceTuneVC, animated: true, completion: nil)
+    }
+    
+    
     private func setupCanvas(size: CGSize) {
         let fitSize = AVMakeRect(aspectRatio: size, insideRect: topContainerView.bounds)
         

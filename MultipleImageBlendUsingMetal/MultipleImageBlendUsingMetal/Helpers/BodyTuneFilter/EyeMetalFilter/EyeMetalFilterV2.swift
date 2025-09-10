@@ -1,29 +1,33 @@
 //
-//  OuterLipsFilter.swift
+//  EyeMetalFilterV2.swift
 //  MultipleImageBlendUsingMetal
 //
-//  Created by BCL Device 8 on 14/8/25.
+//  Created by BCL Device 8 on 9/9/25.
 //
+
 
 import UIKit
 import MetalPetal
 
-class LipsMetalFilter: NSObject, MTIFilter {
+class EyeMetalFilterV2: NSObject, MTIFilter {
 
     var outputPixelFormat: MTLPixelFormat = .bgra8Unorm
     var inputImage: MTIImage?
 
-    // Lips parameters
-    var lipCenter: SIMD2<Float> = SIMD2<Float>(0.5, 0.65)
-    var lipRadiusXY: SIMD2<Float> = SIMD2<Float>(0.15, 0.08)
-    var lipScaleFactor: Float = 0.0
+    // Left eye
+    var leftEyeCenter: SIMD2<Float> = SIMD2<Float>(0.35, 0.5)
+    var leftEyeRadiusXY: SIMD2<Float> = SIMD2<Float>(0.1, 0.1)
+
+    // Right eye
+    var rightEyeCenter: SIMD2<Float> = SIMD2<Float>(0.65, 0.5)
+    var rightEyeRadiusXY: SIMD2<Float> = SIMD2<Float>(0.1, 0.1)
     
-    //let dataBuffer = MTIDataBuffer(bytes: <#T##UnsafeRawPointer#>, length: <#T##UInt#>)
+    var scaleFactor: Float = 0.0
 
     static let kernel: MTIRenderPipelineKernel = {
         let vertexDescriptor = MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName)
         let fragmentDescriptor = MTIFunctionDescriptor(
-            name: "lipsScaleShader",
+            name: "eyeScaleShaderV2",
             libraryURL: MTIDefaultLibraryURLForBundle(Bundle.main)
         )
         return MTIRenderPipelineKernel(vertexFunctionDescriptor: vertexDescriptor,
@@ -34,10 +38,13 @@ class LipsMetalFilter: NSObject, MTIFilter {
         guard let inputImage = inputImage else { return nil }
 
         let parameters: [String: Any] = [
-            "lipScaleFactor": lipScaleFactor,
-            "lipCenter": lipCenter,
-            "lipRadiusXY": lipRadiusXY
+            "leftEyeCenter": leftEyeCenter,
+            "leftEyeRadii": leftEyeRadiusXY,
+            "rightEyeCenter": rightEyeCenter,
+            "rightEyeRadii": rightEyeRadiusXY,
+            "scaleFactor": scaleFactor,
         ]
+
         return Self.kernel.apply(to: inputImage, parameters: parameters)
     }
 }
