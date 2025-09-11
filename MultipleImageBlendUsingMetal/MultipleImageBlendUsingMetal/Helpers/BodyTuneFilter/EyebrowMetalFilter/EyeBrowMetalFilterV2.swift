@@ -1,0 +1,46 @@
+//
+//  EyeBrowMetalFilterV2.swift
+//  MultipleImageBlendUsingMetal
+//
+//  Created by BCL Device 8 on 11/9/25.
+//
+
+import UIKit
+import MetalPetal
+
+
+class EyeBrowZoomFilterV2: NSObject, MTIFilter {
+
+    var inputImage: MTIImage?
+    var outputPixelFormat: MTLPixelFormat = .bgra8Unorm
+
+    var leftBrowCenter: SIMD2<Float> = SIMD2(0.35, 0.4)
+    var rightBrowCenter: SIMD2<Float> = SIMD2(0.65, 0.4)
+
+    var leftBrowRadius: SIMD2<Float> = SIMD2(0.08, 0.02)
+    var rightBrowRadius: SIMD2<Float> = SIMD2(0.08, 0.02)
+
+    var scaleFactor: Float = 1.0
+
+    static let kernel: MTIRenderPipelineKernel = {
+        let vertex = MTIFunctionDescriptor(name: MTIFilterPassthroughVertexFunctionName)
+        let fragment = MTIFunctionDescriptor(name: "eyeBrowZoomShader",
+                                             libraryURL: MTIDefaultLibraryURLForBundle(Bundle.main))
+        return MTIRenderPipelineKernel(vertexFunctionDescriptor: vertex,
+                                       fragmentFunctionDescriptor: fragment)
+    }()
+
+    var outputImage: MTIImage? {
+        guard let inputImage else { return nil }
+
+        let params: [String: Any] = [
+            "scaleFactor": scaleFactor,
+            "leftCenter": leftBrowCenter,
+            "rightCenter": rightBrowCenter,
+            "leftRadius": leftBrowRadius,
+            "rightRadius": rightBrowRadius
+        ]
+        
+        return Self.kernel.apply(to: inputImage, parameters: params)
+    }
+}

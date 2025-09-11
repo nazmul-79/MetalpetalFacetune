@@ -22,6 +22,9 @@ enum FaceParsingIndex {
     static let leftEyelidAndContourIndices = FaceParsingIndex.leftEyeContourIndices + FaceParsingIndex.leftEyelidIndices
     
     static let leftIrisIndices: [Int] = [476, 385, 386, 473, 373,374,380,474]
+    
+    static let rightEyeBrow: [Int] = [71,70,46,63,53,105,52,66,65,107,55]
+    static let leftEyeBrow: [Int] = [336,285,296,295,334,282,293,283,251,301,300]
 }
 
 struct FaceTuneFilterModelV2 {
@@ -62,7 +65,7 @@ struct FaceTuneFilterModelV2 {
                     eyeBrowFilterModel.scaleFactor = scaleValue
                 }
                 if eyeBrowFilterModel.scaleFactor != 0.0 {
-                    //outputImage = self.applyEyeBrowFilter(image: outputImage)
+                    outputImage = self.applyEyeBrowFilter(image: outputImage)
                 }
             case .nose:
                 if category == filterCategory {
@@ -130,6 +133,79 @@ struct FaceTuneFilterModelV2 {
         }
         return outputImage
     }
+}
+
+//EyeBrow Filter
+extension FaceTuneFilterModelV2 {
+    mutating func applyEyeBrowFilter(image: MTIImage) -> MTIImage {
+        let filter = EyeBrowZoomFilterV2()
+        filter.inputImage = image
+        filter.leftBrowCenter = eyeBrowFilterModel.leftEyeBrowcenter
+        filter.rightBrowCenter = eyeBrowFilterModel.rightEyeBrowcenter
+        filter.leftBrowRadius = eyeBrowFilterModel.leftEyeBrowRadius
+        filter.rightBrowRadius = eyeBrowFilterModel.rightEyeBrowRadius
+        
+        filter.scaleFactor =  eyeBrowFilterModel.scaleFactor
+        
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return image
+    }
+    
+    mutating func updateEyeBrowFilter() {
+        
+        let leftBrowpoints: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.leftEyeBrow)
+        let rightEyeBrowPoints: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.rightEyeBrow)
+        
+        
+        let convertedPointsleftEye = self.getNoramlizePoint(points: leftBrowpoints)
+        
+        let convertedPointsRightEye = self.getNoramlizePoint(points: rightEyeBrowPoints)
+        
+        
+        let leftBox = eyeBrowBoundingBox(for: convertedPointsleftEye)
+        let rightBox = eyeBrowBoundingBox(for: convertedPointsRightEye)
+        
+        
+        
+        
+        let texWidth  = Float(self.imageSize.width)
+        let texHeight = Float(self.imageSize.height)
+
+        eyeBrowFilterModel.leftEyeBrowcenter = SIMD2<Float>(
+            Float(leftBox.center.x) / texWidth,
+            Float(leftBox.center.y) / texHeight
+        )
+
+        eyeBrowFilterModel.leftEyeBrowRadius = SIMD2<Float>(
+            Float(leftBox.size.width) / texWidth,
+            Float(leftBox.size.height) / texHeight
+        )
+
+        eyeBrowFilterModel.rightEyeBrowcenter = SIMD2<Float>(
+            Float(rightBox.center.x) / texWidth,
+            Float(rightBox.center.y) / texHeight
+        )
+
+        eyeBrowFilterModel.rightEyeBrowRadius = SIMD2<Float>(
+            Float(rightBox.size.width) / texWidth,
+            Float(rightBox.size.height) / texHeight
+        )
+    }
+    
+    func eyeBrowBoundingBox(for points: [CGPoint]) -> (center: CGPoint, size: CGSize) {
+        guard !points.isEmpty else { return (CGPoint.zero, .zero) }
+        let xs = points.map { $0.x }
+        let ys = points.map { $0.y }
+        let minX = xs.min() ?? 0
+        let maxX = xs.max() ?? 0
+        let minY = ys.min() ?? 0
+        let maxY = ys.max() ?? 0
+        let center = CGPoint(x: (minX + maxX) / 2, y: (minY + maxY) / 2)
+        return (center, CGSize(width: maxX - minX, height: maxY - minY))
+    }
+    
 }
 
 //MARK Eyes Functionality For V2

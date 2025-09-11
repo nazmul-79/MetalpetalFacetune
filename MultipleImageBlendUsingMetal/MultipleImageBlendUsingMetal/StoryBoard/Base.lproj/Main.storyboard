@@ -522,7 +522,7 @@
                                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cAi-pa-NPi">
                                                 <rect key="frame" x="16" y="8" width="361" height="44"/>
                                                 <subviews>
-                                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minValue="-100" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="EEa-4Z-Yoj" customClass="CenterOriginSlider" customModule="MultipleImageBlendUsingMetal" customModuleProvider="target">
+                                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="-100" maxValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="EEa-4Z-Yoj" customClass="CenterOriginSlider" customModule="MultipleImageBlendUsingMetal" customModuleProvider="target">
                                                         <rect key="frame" x="-2" y="0.0" width="314" height="45"/>
                                                         <connections>
                                                             <action selector="centerOriginSliderAction:" destination="Ayz-Bc-Ram" eventType="valueChanged" id="Mgc-rt-fzJ"/>
@@ -556,10 +556,10 @@
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eGl-Sd-dAA">
                                                         <rect key="frame" x="0.0" y="-72" width="393" height="44"/>
                                                         <subviews>
-                                                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="4Ls-zD-Mpb">
+                                                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsHorizontalScrollIndicator="NO" showsVerticalScrollIndicator="NO" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="4Ls-zD-Mpb">
                                                                 <rect key="frame" x="16" y="0.0" width="361" height="44"/>
-                                                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                                                <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="g7m-U2-BIm">
+                                                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="g7m-U2-BIm">
                                                                     <size key="itemSize" width="128" height="128"/>
                                                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
@@ -587,6 +587,7 @@
                                                                 <state key="normal" title="Skin"/>
                                                                 <connections>
                                                                     <action selector="tappedOnMainMenuBtn:" destination="Ayz-Bc-Ram" eventType="touchUpInside" id="Wjk-GJ-55O"/>
+                                                                    <action selector="tappedOnMenuOption:" destination="Ayz-Bc-Ram" eventType="touchUpInside" id="ZAK-3Q-BbY"/>
                                                                 </connections>
                                                             </button>
                                                             <button opaque="NO" tag="2001" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="a4T-Vm-4xj">
@@ -596,15 +597,17 @@
                                                                 <state key="normal" title="Shape"/>
                                                                 <connections>
                                                                     <action selector="tappedOnMainMenuBtn:" destination="Ayz-Bc-Ram" eventType="touchUpInside" id="dcL-Q5-I92"/>
+                                                                    <action selector="tappedOnMenuOption:" destination="Ayz-Bc-Ram" eventType="touchUpInside" id="EgX-d3-bxu"/>
                                                                 </connections>
                                                             </button>
-                                                            <button opaque="NO" tag="2003" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VDS-mY-Xpn">
+                                                            <button opaque="NO" tag="2002" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="VDS-mY-Xpn">
                                                                 <rect key="frame" x="267.33333333333331" y="0.0" width="125.66666666666669" height="44"/>
                                                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                                                 <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                                 <state key="normal" title="Look"/>
                                                                 <connections>
                                                                     <action selector="tappedOnMainMenuBtn:" destination="Ayz-Bc-Ram" eventType="touchUpInside" id="1Nh-zb-bP9"/>
+                                                                    <action selector="tappedOnMenuOption:" destination="Ayz-Bc-Ram" eventType="touchUpInside" id="gEL-7c-WQR"/>
                                                                 </connections>
                                                             </button>
                                                         </subviews>
@@ -663,6 +666,9 @@
                         <outlet property="collectionView" destination="4Ls-zD-Mpb" id="fiF-3z-aYR"/>
                         <outlet property="containerScrollView" destination="mmA-KX-7wd" id="7Rm-9F-32I"/>
                         <outlet property="imageView" destination="5bv-JF-7tL" id="62h-sD-PFu"/>
+                        <outlet property="lookBtn" destination="VDS-mY-Xpn" id="4lG-HS-XcB"/>
+                        <outlet property="shapeBtn" destination="a4T-Vm-4xj" id="XQw-iv-bon"/>
+                        <outlet property="skinBtn" destination="15q-Vx-Qoy" id="3fQ-VN-09S"/>
                         <outlet property="valueShowLabelText" destination="Us7-qB-8pF" id="A9M-FZ-juv"/>
                     </connections>
                 </viewController>
@@ -679,10 +685,10 @@
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
         <systemColor name="systemBrownColor">
-            <color red="0.63529411764705879" green="0.51764705882352946" blue="0.36862745098039218" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.63529411759999999" green="0.51764705879999995" blue="0.36862745099999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemGreenColor">
-            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

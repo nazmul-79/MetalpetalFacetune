@@ -18,6 +18,10 @@ class FirebaseFaceTuneVC: UIViewController, UIScrollViewDelegate {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var centerOriginSlider: CenterOriginSlider!
     @IBOutlet weak var containerScrollView: UIScrollView!
+    @IBOutlet weak var skinBtn: UIButton!
+    @IBOutlet weak var shapeBtn: UIButton!
+    @IBOutlet weak var lookBtn: UIButton!
+    
     
     private var faceLandmarkerService: FaceLandmarkerService?
     
@@ -30,8 +34,13 @@ class FirebaseFaceTuneVC: UIViewController, UIScrollViewDelegate {
     private var boundingBox: CGRect = .zero
     private var isServiceInitialized = false
     private var overlayView: OverlayView!
-    var faceTuneModel = FaceTuneFilterModel()
     var faceTuneModelV2 = FaceTuneFilterModelV2()
+    
+    lazy var optionsBtn : [UIButton] = [skinBtn, shapeBtn, lookBtn]
+    private var currentSelectedShapeOption: ShapeOption = .facialProportion
+    private var currentSelectedLookOption: Looks = .eyeLashesh
+    var currentCategory: FeatureCategory = .Shape
+    private var selectedIndex = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,6 +53,9 @@ class FirebaseFaceTuneVC: UIViewController, UIScrollViewDelegate {
         containerScrollView.maximumZoomScale = 5.0
         containerScrollView.zoomScale = 1.0
         self.imageView.backgroundColor = .white
+        self.collectionView.delegate = self
+        self.collectionView.dataSource = self
+        registerCollectionViewCell()
     }
     
     deinit {
@@ -71,6 +83,17 @@ class FirebaseFaceTuneVC: UIViewController, UIScrollViewDelegate {
         cleanupFaceLandmarker()
     }
     
+    private func registerCollectionViewCell() {
+        // Register cell
+        self.collectionView.register(UINib(nibName: TuneOptionCollectionViewCell.cellID, bundle: nil), forCellWithReuseIdentifier: TuneOptionCollectionViewCell.cellID)
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal // or .vertical
+        layout.minimumLineSpacing = 10       // space between rows/items horizontally
+        layout.minimumInteritemSpacing = 10   // space between items in same row
+        layout.itemSize = CGSize(width: 80.0, height: 44.0) // fixed cell size
+        collectionView.collectionViewLayout = layout
+    }
+    
     private func faceLandMarKCreate() {
         
     }
@@ -88,14 +111,32 @@ class FirebaseFaceTuneVC: UIViewController, UIScrollViewDelegate {
     }
     
     @IBAction func centerOriginSliderAction(_ sender: CenterOriginSlider) {
-        debugPrint("Value ",sender.value)
-        let img = faceTuneModelV2.applyAllFilter(scaleValue: sender.value,
-                                                 image: self.image!,
-                                                 filterName: ShapeOption.eyes.rawValue)
-//        let fitler = MTIBlendFilter(blendMode: .screen)
-//        fitler.inputImage = img
-//        fitler.inputBackgroundImage = self.image!
-        self.imageView.image = img
+        self.valueShowLabelText.text = "\(Int(sender.value))"
+        guard var orginalImage = self.image else {return}
+       // let img = faceTuneModelV2.applyAllFilter(scaleValue: sender.value,
+                                                // image: orginalImage,
+                                                 //filterName: ShapeOption.eyes.rawValue)
+        
+      
+        //self.convertPointsForFace(self.leftEyePoints, self.boundingBox, value: sender.value)
+        let value = sender.value
+        switch currentCategory {
+        case .Skin:
+            break
+        case .Shape:
+            orginalImage = self.faceTuneModelV2.applyAllFilter(scaleValue: value,
+                                                            image: orginalImage,
+                                                               filterName: self.currentSelectedShapeOption.rawValue) ?? MTIImage.black
+            break
+        case .Look:
+            orginalImage = self.faceTuneModelV2.applyAllFilter(scaleValue: value,
+                                                            image: orginalImage,
+                                                            filterName: self.currentSelectedLookOption.rawValue) ?? MTIImage.black
+        }
+        
+        DispatchQueue.main.async {
+            self.imageView.image = orginalImage
+        }
     }
     
     private func cleanupFaceLandmarker() {
@@ -115,7 +156,37 @@ class FirebaseFaceTuneVC: UIViewController, UIScrollViewDelegate {
         imageView.image = nil
         image = nil
     }
-
+    
+    
+    @IBAction func tappedOnMenuOption(_ sender: UIButton) {
+        debugPrint("tappedOnMenuOptionBtn",sender.tag)
+        switch sender.tag {
+        case 2000:
+            self.currentCategory = .Skin
+            debugPrint("Skin Tag",sender.tag)
+        case 2001:
+            self.currentCategory = .Shape
+            debugPrint("Shapes Tag",sender.tag)
+        case 2002:
+            self.currentCategory = .Look
+            debugPrint("Look Tag",sender.tag)
+        default:
+            break
+        }
+        setSelectedBtnTitleColor(index: sender.tag)
+        self.collectionView.reloadData()
+    }
+    
+    private func setSelectedBtnTitleColor(index: Int) {
+        for btn in optionsBtn {
+            if btn.tag == index {
+                btn.setTitleColor(.red, for: .normal)
+            } else {
+                btn.setTitleColor(.blue, for: .normal)
+            }
+        }
+    }
+    
     
     private func initializeFaceLandmarkerIfNeeded() {
         guard !isServiceInitialized else { return }
@@ -429,6 +500,45 @@ extension FirebaseFaceTuneVC {
         }
         return normalizedPoints
     }
+    
+    private func setCurretnSelectShapeOptions(shapeOptions: ShapeOption) {
+        self.currentSelectedShapeOption = shapeOptions
+        var value: Float = 0.0
+        switch shapeOptions {
+        case .facialProportion:
+            value = Float(faceTuneModelV2.faceProportionFilter.scaleFactor)
+            break
+        case .eyes:
+            value = Float(faceTuneModelV2.eyeFilterModel.scaleFactor)
+        case .nose:
+            value = Float(faceTuneModelV2.noseFilterModel.scaleFactor)
+        case .lips:
+            value = Float(faceTuneModelV2.lipsFilterModel.scaleFactor)
+        case .cheeks:
+            value = Float(faceTuneModelV2.jawFilterModel.scaleFactor)
+        case .eyeBrow:
+            value = Float(faceTuneModelV2.eyeBrowFilterModel.scaleFactor)
+        }
+        self.centerOriginSlider.value = value
+        self.valueShowLabelText.text = "\(value)"
+    }
+    
+    private func setCurrentSelectedLooksOption(look: Looks) {
+        self.currentSelectedLookOption = look
+        var value: Float = 0.0
+        switch look {
+        case .eyeLashesh:
+            value = self.faceTuneModelV2.eyelashFilterModel.scaleFactor
+        case .eyeContrast:
+            value = self.faceTuneModelV2.eyeBrightnessFilterModel.scaleFactor
+        case .teethWhitening:
+            value = self.faceTuneModelV2.teethWhiteningModel.scaleFactor
+        default:
+            break
+        }
+        self.centerOriginSlider.value = value
+        self.valueShowLabelText.text = "\(value)"
+    }
 
 }
 
@@ -442,14 +552,11 @@ extension FirebaseFaceTuneVC: PhotoPickerDelegate {
         backgroundQueue.async { [weak self] in
             guard let self = self else {return}
             autoreleasepool {
-                self.faceTuneModel.imageSize = photo.size
                 let photoR = self.resizedImage(photo, maxSize: 256)
                 debugPrint("OriginalImage size",photoR.size, photo.size )
                 let resultBundle = self.faceLandmarkerService?.detect(image: photoR)
                 let faceLandmarkerResult = resultBundle?.faceLandmarkerResults.first
                 let faceLandmarkerResult1 = faceLandmarkerResult
-                
-              
                 DispatchQueue.main.async { [weak self] in
                     autoreleasepool {
                         guard let self = self else { return }
@@ -467,6 +574,7 @@ extension FirebaseFaceTuneVC: PhotoPickerDelegate {
                             self.faceTuneModelV2.allPoints = dots
                             self.faceTuneModelV2.imageViewBounds = self.imageView.bounds
                             self.faceTuneModelV2.updateEyeFilterModel()
+                            self.faceTuneModelV2.updateEyeBrowFilter()
                             //self.faceTuneModel.updateTeethWhiteningFilter(innerLipsPoint: normalizePoint,
                                                                           //size: photo.size)
                         }
@@ -480,75 +588,94 @@ extension FirebaseFaceTuneVC: PhotoPickerDelegate {
     }
 }
 
-
-/// A straight line.
-struct Line1 {
-  let from: CGPoint
-  let to: CGPoint
-}
-
-/// Line connection
-struct LineConnection {
-  let color: UIColor
-  let lines: [Line1]
-}
-
-/**
- This structure holds the display parameters for the overlay to be drawon on a detected object.
- */
-struct FaceOverlay {
-  let dots: [CGPoint]
-  let lineConnections: [LineConnection]
-}
-
-class OverlayView: UIView {
-    var faceOverlays: [FaceOverlay] = [] {
-        didSet { setNeedsDisplay() }
+//MARK: - UICollectionViewDelegate, UICollectionViewDataSource
+extension FirebaseFaceTuneVC: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        debugPrint("featureOptions[currentCategory]?.count ?? 0",featureOptions[currentCategory]?.count ?? 0)
+        return featureOptions[currentCategory]?.count ?? 0
     }
     
-    override func draw(_ rect: CGRect) {
-        guard !faceOverlays.isEmpty else { return }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
-        for faceOverlay in faceOverlays {
-            // draw dots
-            for (index, dot) in faceOverlay.dots.enumerated() {
-                /*let dotRect = CGRect(
-                    x: dot.x - DefaultConstants.pointRadius / 2,
-                    y: dot.y - DefaultConstants.pointRadius / 2,
-                    width: DefaultConstants.pointRadius,
-                    height: DefaultConstants.pointRadius
-                )
-                let path = UIBezierPath(ovalIn: dotRect)
-                DefaultConstants.pointFillColor.setFill()
-                DefaultConstants.pointColor.setStroke()
-                path.stroke()
-                path.fill()*/
-                
-                // Index text
-                let indexString = "\(index)" as NSString
-                let attributes: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.systemFont(ofSize: 5, weight: .regular),
-                    .foregroundColor: UIColor.white
-                ]
-                let textSize = indexString.size(withAttributes: attributes)
-                let textPoint = CGPoint(
-                    x: dot.x - textSize.width / 2,
-                    y: dot.y - textSize.height / 2
-                )
-                indexString.draw(at: textPoint, withAttributes: attributes)
-            }
-            
-            // draw lines
-            for lineConnection in faceOverlay.lineConnections {
-             let path = UIBezierPath()
-             for line in lineConnection.lines {
-             path.move(to: line.from)
-             path.addLine(to: line.to)
-             }
-             path.lineWidth = DefaultConstants.lineWidth
-             lineConnection.color.setStroke()
-             path.stroke()
-             }
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TuneOptionCollectionViewCell.cellID,
+                                                            for: indexPath) as? TuneOptionCollectionViewCell else {
+            return UICollectionViewCell()
         }
+        
+        cell.layer.borderWidth = 1
+        cell.layer.cornerRadius = 8
+        if selectedIndex == indexPath.item {
+            cell.layer.borderColor = UIColor.red.cgColor
+        } else {
+            cell.layer.borderColor = UIColor.black.cgColor
+        }
+        if let enumCase = featureOptions[currentCategory]?[indexPath.item] {
+            switch enumCase {
+            case let skin as Skin:
+                cell.setName(name: skin.rawValue)
+            case let shape as ShapeOption:
+                cell.setName(name: shape.rawValue)
+            case let look as Looks:
+                cell.setName(name: look.rawValue)
+            default:
+                break
+            }
+        }
+        return cell
     }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let selected = featureOptions[currentCategory]?[indexPath.item] else { return }
+        
+        self.selectedIndex = indexPath.item
+        
+        switch selected {
+        case let skin as Skin:
+            print("Selected Jaw: \(skin.rawValue)")
+            // call jaw effect function here
+        case let shape as ShapeOption:
+            setCurretnSelectShapeOptions(shapeOptions: shape)
+            print("Selected Lips: \(shape.rawValue)")
+            // call lips effect function here
+        case let look as Looks:
+            print("Selected Nose: \(look.rawValue)")
+            setCurrentSelectedLooksOption(look: look)
+            // call nose effect function here
+        default:
+            break
+        }
+        collectionView.reloadData()
+    }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                        layout collectionViewLayout: UICollectionViewLayout,
+                        sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        let text: String
+        if let enumCase = featureOptions[currentCategory]?[indexPath.item] {
+            switch enumCase {
+            case let skin as Skin:
+                text = skin.rawValue
+            case let shape as ShapeOption:
+                text = shape.rawValue
+            case let look as Looks:
+                text = look.rawValue
+            default:
+                text = ""
+            }
+        } else {
+            text = ""
+        }
+        
+        // Calculate width based on text
+        let font = UIFont.systemFont(ofSize: 16) // Use the font your cell label uses
+        let padding: CGFloat = 20 // left + right padding
+        let textWidth = text.size(withAttributes: [.font: font]).width
+        let cellWidth = textWidth + padding
+        
+        let height: CGFloat = 44 // Or whatever height your cell uses
+        return CGSize(width: cellWidth, height: height)
+    }
+
 }
+
