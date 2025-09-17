@@ -423,14 +423,18 @@ extension FirebaseFaceTuneVC {
                 (0, 37), (37, 39), (39, 40), (40, 185), (185, 61) // closed loop
             ]
             
-//        lineConnections.append(LineConnection(
-//                color: DefaultConstants.lipsConnectionsColor,
-//                lines: innerLipsConnections.map { connection in
-//                    let start = dots[connection.0]
-//                    let end = dots[connection.1]
-//                    return Line1(from: start, to: end)
-//                }
-//            ))
+        lineConnections.append(LineConnection(
+                color: DefaultConstants.lipsConnectionsColor,
+                lines: outerLipsConnections.map { connection in
+                    let start = dots[connection.0]
+                    let end = dots[connection.1]
+                    return Line1(from: start, to: end)
+                }
+            ))
+            
+          
+            
+           //debugPrint("lipIndices ---->", lipIndices)
             
             // 🔥 Only keep inner lips points
                 let innerLipsDots = innerLipsIndices.compactMap { index in
@@ -467,7 +471,23 @@ extension FirebaseFaceTuneVC {
             let leftEyeDots = leftEye.compactMap { index in
                 index < dots.count ? dots[index] : nil
             }
-        
+            
+            let faceOvalIndices: [Int] = FaceLandmarker.faceOvalConnections().compactMap { connection in
+                return Int(connection.start)
+            }
+            
+            let cheeksIndices: [Int] = [215,58,138,135,172,136,135,169,150,149,32,262,208,199,428,369,395,379,176,171,175,148,152,377,396,400,378,394,365,364,397,367,288,435]
+            
+            let noseIndices: [Int] = [
+                244,245,189,413,464,453
+                
+            ]
+            
+            let rightEyeContourIndices: [Int] = [33, 7, 163, 144, 145, 153, 154, 155,133, 173, 157, 158, 159, 160, 161, 246]
+            
+            let leftEyeDots1 = rightEyeContourIndices.compactMap { index in
+                index < dots.count ? dots[index] : nil
+            }
             
             debugPrint("Inner Lips Point", innerLipsDots)
 
@@ -575,6 +595,11 @@ extension FirebaseFaceTuneVC: PhotoPickerDelegate {
                             self.faceTuneModelV2.imageViewBounds = self.imageView.bounds
                             self.faceTuneModelV2.updateEyeFilterModel()
                             self.faceTuneModelV2.updateEyeBrowFilter()
+                            self.faceTuneModelV2.updateLipsFilter()
+                            self.faceTuneModelV2.updateFaceProportionFilter()
+                            self.faceTuneModelV2.updateFaceCheeksFilter()
+                            self.faceTuneModelV2.updateNoseFilterModel()
+                            self.faceTuneModelV2.updateEyelashFilterModel()
                             //self.faceTuneModel.updateTeethWhiteningFilter(innerLipsPoint: normalizePoint,
                                                                           //size: photo.size)
                         }

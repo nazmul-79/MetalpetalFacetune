@@ -57,6 +57,7 @@ struct NoseFilterModel {
     var noseCenter: SIMD2<Float> = .zero
     var noseRadius: SIMD2<Float> = .zero
     var scaleFactor: Float = 0
+    var nosePointsFloat: [SIMD2<Float>] = []
 }
 
 struct JawFilterModel {
@@ -77,10 +78,13 @@ struct FacePropotionModel {
     var faceCenter: SIMD2<Float> = .zero
     var faceRadius: SIMD2<Float> = .zero
     var scaleFactor: CGFloat = 0
+    var rotation: Float = 0
+    var smoothCurveFast: [SIMD2<Float>] = []
 }
 
 struct EyelashFilterModel {
     var scaleFactor: Float = 0
+    var curveFast: [SIMD2<Float>] = []
 }
 
 struct EyeBrightnessFilterModel {
