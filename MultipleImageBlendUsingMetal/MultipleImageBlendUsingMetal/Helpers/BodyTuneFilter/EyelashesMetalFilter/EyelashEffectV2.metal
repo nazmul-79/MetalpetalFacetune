@@ -10,7 +10,7 @@
 using namespace metalpetal;
 
 
-/*// --- Helpers ---
+// --- Helpers ---
 
 // Inflate a point from the center by a small amount
 inline float2 inflatedPoint(float2 p, float2 center, float inflateAmount) {
@@ -74,7 +74,7 @@ fragment float4 eyelashShader(VertexOut vert [[stage_in]],
        // --- Texel size & inflation ---
        float2 texelSize = float2(1.0 / float(inputTexture.get_width()),
                                  1.0 / float(inputTexture.get_height()));
-       float inflateAmount = max(texelSize.x, texelSize.y) * 5.0;
+       float inflateAmount = max(texelSize.x, texelSize.y) * 5.5;
 
        // --- Polygon inclusion ---
        bool inside = pointInPolygonInflated(uv, points, count, center, inflateAmount);
@@ -100,7 +100,6 @@ fragment float4 eyelashShader(VertexOut vert [[stage_in]],
        return color;
 }
 
-*/
 
 /*// --- Inflate a point from the center ---
 inline float2 inflatedPoint(float2 p, float2 center, float inflateAmount) {
@@ -185,7 +184,7 @@ fragment float4 eyelashShader(VertexOut vert [[stage_in]],
 }
 */
 
-// --- Quadratic Bezier interpolation ---
+/*// --- Quadratic Bezier interpolation ---
 inline float2 quadBezier(float2 p0, float2 p1, float2 p2, float t) {
     float u = 1.0 - t;
     return u*u*p0 + 2.0*u*t*p1 + t*t*p2;
@@ -197,38 +196,42 @@ inline float2 quadTangent(float2 p0, float2 p1, float2 p2, float t) {
     return normalize(2.0*u*(p1 - p0) + 2.0*t*(p2 - p1));
 }
 
-// --- Distance to inflated quad segment ---
-inline float distanceToInflatedQuadSegment(float2 uv, float2 p0, float2 p1, float2 p2, int steps, float inflate, float2 texelSize) {
+// --- Distance + fade along normal ---
+inline float distanceAndFadeAlongCurve(float2 uv,
+                                       float2 p0, float2 p1, float2 p2,
+                                       int steps, float inflate, float2 texelSize,
+                                       float fadeLength,
+                                       thread float &fadeMask) {
     float minDist = 1e6;
+    float bestFade = 0.0;
+
     for (int i = 0; i <= steps; i++) {
         float t = float(i) / float(steps);
         float2 pos = quadBezier(p0, p1, p2, t);
 
-        // inflate outward along perpendicular
+        // tangent & normal
         float2 tangent = quadTangent(p0, p1, p2, t);
-        float2 normal = float2(-tangent.y, tangent.x);
-        pos += normal * inflate * max(texelSize.x, texelSize.y);
+        float2 normal = normalize(float2(-tangent.y, tangent.x));
 
-        float distUV = distance(uv, pos) / max(texelSize.x, texelSize.y);
-        minDist = min(minDist, distUV);
+        // inflated position outward
+        float2 inflatedPos = pos + normal * inflate * max(texelSize.x, texelSize.y);
+
+        // distance
+        float distUV = distance(uv, inflatedPos) / max(texelSize.x, texelSize.y);
+
+        if (distUV < minDist) {
+            minDist = distUV;
+
+            // how far UV is *outside* along the normal
+            float proj = dot(uv - pos, normal);
+            bestFade = clamp(1.0 - proj / fadeLength, 0.0, 1.0);
+        }
     }
+
+    fadeMask = bestFade;
     return minDist;
 }
 
-// --- Distance to full inflated curve ---
-inline float distanceToInflatedQuadCurve(float2 uv, device const float2 *points, uint count, int steps, float inflate, float2 texelSize) {
-    float minDist = 1e6;
-    for (uint i = 0; i < count - 2; i += 2) { // each 3 points = one quad
-        float2 p0 = points[i];
-        float2 p1 = points[i+1];
-        float2 p2 = points[i+2];
-        float d = distanceToInflatedQuadSegment(uv, p0, p1, p2, steps, inflate, texelSize);
-        minDist = min(minDist, d);
-    }
-    return minDist;
-}
-
-// --- Fragment shader ---
 fragment float4 eyelashShader(VertexOut vert [[stage_in]],
                               texture2d<float> inputTexture [[texture(0)]],
                               constant float &scaleFactor [[buffer(0)]],
@@ -242,19 +245,41 @@ fragment float4 eyelashShader(VertexOut vert [[stage_in]],
     float2 texelSize = float2(1.0 / float(inputTexture.get_width()),
                               1.0 / float(inputTexture.get_height()));
 
-    // --- Distance to inflated curve ---
-    float inflateAmount = 3.0; // adjust to make the curve “thicker”
-    float dist = distanceToInflatedQuadCurve(uv, points, count, 16, inflateAmount, texelSize);
+    float inflateAmount = 5.0; // lash thickness
+    int steps = 16;
+    float fadeLength = 0.05;   // fade length along normal (tweak this)
+
+    float minDist = 1e6;
+    float fadeMask = 0.0;
+
+    // --- Iterate over curve segments ---
+    for (uint i = 0; i < count - 2; i += 2) {
+        float2 p0 = points[i];
+        float2 p1 = points[i+1];
+        float2 p2 = points[i+2];
+
+        float segFade = 0.0;
+        float d = distanceAndFadeAlongCurve(uv, p0, p1, p2,
+                                            steps, inflateAmount, texelSize,
+                                            fadeLength, segFade);
+        if (d < minDist) {
+            minDist = d;
+            fadeMask = segFade;
+        }
+    }
 
     // --- Edge mask ---
-    float thickness = 3.0; // pixels
-    float edgeMask = smoothstep(thickness, 0.0, dist);
+    float edgeMask = smoothstep(inflateAmount + 1.0, 0.0, minDist);
     if (edgeMask <= 0.01) return color;
 
-    // --- Color ---
-    float3 lowerColor = float3(0.06, 0.03, 0.01);
-    float factor = clamp(scaleFactor / 100.0, 0.0, 1.0); // only positive effect for now
-    color.rgb = mix(color.rgb, lowerColor, factor * edgeMask);
+    // --- Combine edge with fade along normal ---
+    float finalMask = edgeMask * fadeMask;
+
+    // --- Apply eyelash color ---
+    float3 lashColor = float3(0.06, 0.03, 0.01);
+    float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+    color.rgb = mix(color.rgb, lashColor, factor * finalMask);
 
     return color;
 }
+*/

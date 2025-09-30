@@ -388,6 +388,15 @@ extension FirebaseFaceTuneVC {
               return Line1(from: start, to: end)
           })))*/
             
+            lineConnections.append(LineConnection(
+              color: DefaultConstants.leftEyebrowConnectionsColor,
+              lines: FaceLandmarker.leftEyebrowConnections()
+              .map({ connection in
+              let start = dots[Int(connection.start)]
+              let end = dots[Int(connection.end)]
+                return Line1(from: start, to: end)
+            })))
+            
             let innerLipsConnections: [(Int, Int)] = [
                 (78, 95), (95, 88), (88, 178), (178, 87), (87, 14),
                 (14, 317), (317, 402), (402, 318), (318, 324), (324, 308),
@@ -400,6 +409,12 @@ extension FirebaseFaceTuneVC {
                 318, 324, 308, 415, 310, 311, 312,
                 13, 82, 81, 80, 191
             ]
+            
+             //let rightIrisIndices: [Int] = [469, 471,159,158,160,468,145]
+            
+             let rightIrisIndices: [Int] = [468,471,160,159,158,469,153,145,144]
+            
+             let leftIrisIndices: [Int] = [476, 385, 386, 473, 373,374,380,474]
             
             /*lineConnections.append(LineConnection(
                 color: DefaultConstants.lipsConnectionsColor,
@@ -419,18 +434,92 @@ extension FirebaseFaceTuneVC {
             let outerLipsConnections: [(Int, Int)] = [
                 (61, 146), (146, 91), (91, 181), (181, 84), (84, 17),
                 (17, 314), (314, 405), (405, 321), (321, 375), (375, 291),
-                (291, 409), (409, 270), (270, 269), (269, 267), (267, 0),
+                (291, 409), (409, 270), (270, 269), (269, 0), (269, 0),
                 (0, 37), (37, 39), (39, 40), (40, 185), (185, 61) // closed loop
             ]
             
-        lineConnections.append(LineConnection(
-                color: DefaultConstants.lipsConnectionsColor,
-                lines: outerLipsConnections.map { connection in
-                    let start = dots[connection.0]
-                    let end = dots[connection.1]
-                    return Line1(from: start, to: end)
-                }
-            ))
+//        lineConnections.append(LineConnection(
+//                color: DefaultConstants.lipsConnectionsColor,
+//                lines: outerLipsConnections.map { connection in
+//                    let start = dots[connection.0]
+//                    let end = dots[connection.1]
+//                    return Line1(from: start, to: end)
+//                }
+//            ))
+            
+//            lineConnections.append(LineConnection(
+//                color: DefaultConstants.lipsConnectionsColor,
+//                lines: rightIrisIndices.compactMap({ index in
+//                    return Line1(from: CGPoint(x: 0, y: 0), to: dots[index])
+//                })
+//            ))
+            
+            var rightLines: [Line1] = []
+            for i in 0..<rightIrisIndices.count {
+                let startIndex = rightIrisIndices[i]
+                let endIndex = rightIrisIndices[(i + 1) % rightIrisIndices.count] // wrap around
+                let startPoint = dots[startIndex]
+                let endPoint = dots[endIndex]
+                rightLines.append(Line1(from: startPoint, to: endPoint))
+            }
+            lineConnections.append(LineConnection(color: DefaultConstants.lipsConnectionsColor, lines: rightLines))
+            
+            var leftLines: [Line1] = []
+            for i in 0..<leftIrisIndices.count {
+                let startIndex = leftIrisIndices[i]
+                let endIndex = leftIrisIndices[(i + 1) % leftIrisIndices.count] // wrap around
+                let startPoint = dots[startIndex]
+                let endPoint = dots[endIndex]
+                leftLines.append(Line1(from: startPoint, to: endPoint))
+            }
+            lineConnections.append(LineConnection(color: DefaultConstants.lipsConnectionsColor, lines: leftLines))
+            
+//            lineConnections.append(LineConnection(
+//                color: DefaultConstants.lipsConnectionsColor,
+//                lines: leftIrisIndices.compactMap({ index in
+//                    return Line1(from: CGPoint(x: 0, y: 0), to: dots[index])
+//                })
+//            ))
+            
+            /*lineConnections.append(LineConnection(
+                    color: DefaultConstants.lipsConnectionsColor,
+                    lines: innerLipsConnections.map { connection in
+                        let start = dots[connection.0]
+                        let end = dots[connection.1]
+                        return Line1(from: start, to: end)
+                    }
+                ))
+            
+            lineConnections.append(LineConnection(
+              color: DefaultConstants.lipsConnectionsColor,
+              lines: FaceLandmarker.lipsConnections()
+              .map({ connection in
+              let start = dots[Int(connection.start)]
+              let end = dots[Int(connection.end)]
+                  debugPrint("Statr and enf", Int(connection.start),Int(connection.end))
+                return Line1(from: start, to: end)
+            })))*/
+            
+            
+            /*lineConnections.append(LineConnection(
+              color: DefaultConstants.lipsConnectionsColor,
+              lines: FaceLandmarker.leftIrisConnections()
+              .map({ connection in
+              let start = dots[Int(connection.start)]
+              let end = dots[Int(connection.end)]
+                  debugPrint("Statr and enf", Int(connection.start),Int(connection.end))
+                return Line1(from: start, to: end)
+            })))
+            
+            lineConnections.append(LineConnection(
+              color: DefaultConstants.lipsConnectionsColor,
+              lines: FaceLandmarker.rightIrisConnections()
+              .map({ connection in
+              let start = dots[Int(connection.start)]
+              let end = dots[Int(connection.end)]
+                  debugPrint("Statr and enf", Int(connection.start),Int(connection.end))
+                return Line1(from: start, to: end)
+            })))*/
             
           
             
@@ -485,7 +574,20 @@ extension FirebaseFaceTuneVC {
             
             let rightEyeContourIndices: [Int] = [33, 7, 163, 144, 145, 153, 154, 155,133, 173, 157, 158, 159, 160, 161, 246]
             
-            let leftEyeDots1 = rightEyeContourIndices.compactMap { index in
+            let  outerLipsPoints: [Int] = [
+                61, 146, 91, 181, 84, 17,
+                314, 405, 321, 375, 291,
+                409, 270, 269, 267, 0,
+                37, 39, 40, 185 ]
+            
+            let innerLipsIndices1: [Int] = [
+                78, 95, 88, 178, 87, 14, 317, 402,
+                318, 324, 308, 415, 310, 311, 312,
+                13, 82, 81, 80, 191,85
+            ]
+            
+            let points = rightIrisIndices + leftIrisIndices
+            let leftEyeDots1 = points.compactMap { index in
                 index < dots.count ? dots[index] : nil
             }
             
@@ -574,7 +676,7 @@ extension FirebaseFaceTuneVC: PhotoPickerDelegate {
             autoreleasepool {
                 let photoR = self.resizedImage(photo, maxSize: 256)
                 debugPrint("OriginalImage size",photoR.size, photo.size )
-                let resultBundle = self.faceLandmarkerService?.detect(image: photoR)
+                let resultBundle = self.faceLandmarkerService?.detect(image: photo)
                 let faceLandmarkerResult = resultBundle?.faceLandmarkerResults.first
                 let faceLandmarkerResult1 = faceLandmarkerResult
                 DispatchQueue.main.async { [weak self] in
@@ -600,6 +702,11 @@ extension FirebaseFaceTuneVC: PhotoPickerDelegate {
                             self.faceTuneModelV2.updateFaceCheeksFilter()
                             self.faceTuneModelV2.updateNoseFilterModel()
                             self.faceTuneModelV2.updateEyelashFilterModel()
+                            self.faceTuneModelV2.updateLipsContrastFilterModel()
+                            self.faceTuneModelV2.updateEyeContrast()
+                            self.faceTuneModelV2.updateEyeBrowContrast()
+                            self.faceTuneModelV2.updateNeckShadow()
+                            self.faceTuneModelV2.updateFaceShadowFilter()
                             //self.faceTuneModel.updateTeethWhiteningFilter(innerLipsPoint: normalizePoint,
                                                                           //size: photo.size)
                         }

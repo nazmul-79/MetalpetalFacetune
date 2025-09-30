@@ -17,7 +17,7 @@ enum FilteryType: String, CaseIterable {
     case eyeBrow = "Eye Brow"
     case eyeLashesh = "Eye Lashesh"
     case eyeContrast = "Eye Contrast"
-    case EyeBrows = "Eye Brows"
+    case EyeBrowsConstrast = "Eye Brows"
     case brighterLips = "Brighter Lips"
     case teethWhitening = "Teeth Whitening"
     case shadow = "Shadow"
@@ -67,13 +67,33 @@ struct JawFilterModel {
     var scaleFactor: CGFloat = 0
 }
 
+struct NeckShadowFilterModel {
+    var jawPoints: [SIMD2<Float>] = []
+    var scaleFactor: CGFloat = 0
+}
+
 struct LipsBrightenFilterModel {
     var outerPoints: [SIMD2<Float>] = []
     var innerPoints: [SIMD2<Float>] = []
     var scaleFactor: CGFloat = 0
 }
 
+struct EyeBrowBrightenFilterModel {
+    var leftPoints: [SIMD2<Float>] = []
+    var rightPoints: [SIMD2<Float>] = []
+    var scaleFactor: CGFloat = 0
+}
+
 struct FacePropotionModel {
+    var faceRect: CGRect = .zero
+    var faceCenter: SIMD2<Float> = .zero
+    var faceRadius: SIMD2<Float> = .zero
+    var scaleFactor: CGFloat = 0
+    var rotation: Float = 0
+    var smoothCurveFast: [SIMD2<Float>] = []
+}
+
+struct FaceShadowModel {
     var faceRect: CGRect = .zero
     var faceCenter: SIMD2<Float> = .zero
     var faceRadius: SIMD2<Float> = .zero
@@ -89,11 +109,17 @@ struct EyelashFilterModel {
 
 struct EyeBrightnessFilterModel {
     var scaleFactor: Float = 0
+    var leftEyePoints: [SIMD2<Float>] = []
+    var leftIrisPoints: [SIMD2<Float>] = []
+    var rightEyePoints: [SIMD2<Float>] = []
+    var rightIrisPoints: [SIMD2<Float>] = []
 }
 
 struct TeethWhiteningFilterModel {
     var innerLipsPoints: [CGPoint] = []
     var scaleFactor: Float = 0.0
+    var outerPoints: [SIMD2<Float>] = []
+    var innerPoints: [SIMD2<Float>] = []
     var innerLipsCenter: SIMD2<Float> = .zero
     var innerLipsRadius: SIMD2<Float> = .zero
     var maskImage: MTIImage? = nil

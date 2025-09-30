@@ -41,17 +41,17 @@ class OverlayView: UIView {
         for faceOverlay in faceOverlays {
             // draw dots
             for (index, dot) in faceOverlay.dots.enumerated() {
-                /*let dotRect = CGRect(
+                let dotRect = CGRect(
                     x: dot.x - DefaultConstants.pointRadius / 2,
                     y: dot.y - DefaultConstants.pointRadius / 2,
                     width: DefaultConstants.pointRadius,
                     height: DefaultConstants.pointRadius
                 )
-                let path = UIBezierPath(ovalIn: dotRect)
-                DefaultConstants.pointFillColor.setFill()
-                DefaultConstants.pointColor.setStroke()
-                path.stroke()
-                path.fill()*/
+                //let path = UIBezierPath(ovalIn: dotRect)
+                //DefaultConstants.pointFillColor.setFill()
+                //DefaultConstants.pointColor.setStroke()
+                //path.stroke()
+                //path.fill()
                 
                 // Index text
                 let indexString = "\(index)" as NSString
@@ -68,7 +68,7 @@ class OverlayView: UIView {
             }
             
             // draw lines
-            for lineConnection in faceOverlay.lineConnections {
+            /*for lineConnection in faceOverlay.lineConnections {
              let path = UIBezierPath()
              for line in lineConnection.lines {
              path.move(to: line.from)
@@ -77,7 +77,7 @@ class OverlayView: UIView {
              path.lineWidth = DefaultConstants.lineWidth
              lineConnection.color.setStroke()
              path.stroke()
-             }
+             }*/
         }
     }
 }

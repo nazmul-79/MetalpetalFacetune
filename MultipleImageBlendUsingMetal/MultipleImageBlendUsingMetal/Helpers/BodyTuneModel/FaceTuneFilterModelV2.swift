@@ -14,7 +14,7 @@ enum FaceParsingIndex {
     
     static let rightEyelidAndContourIndices = FaceParsingIndex.rightEyelidIndices + FaceParsingIndex.rightEyeContourIndices
 
-    static let rightIrisIndices: [Int] = [469, 471,159,158,160,468,171,145]
+    static let rightIrisIndices: [Int] = [471,160,159,158,469,153,145,144] //468
     
     static let leftEyeContourIndices: [Int] = [263, 249, 390, 373, 374, 380, 381, 382,362,398, 384, 385, 386, 387, 388, 466]
     
@@ -22,11 +22,12 @@ enum FaceParsingIndex {
     
     static let leftEyelidAndContourIndices = FaceParsingIndex.leftEyeContourIndices + FaceParsingIndex.leftEyelidIndices
     
-    static let leftIrisIndices: [Int] = [476, 385, 386, 473, 373,374,380,474]
+    static let leftIrisIndices: [Int] = [476, 385, 386,387,474,373,374,380] //473
     
-    static let rightEyeBrow: [Int] = [71,70,46,63,53,105,52,66,65,107,55]
-    static let leftEyeBrow: [Int] = [336,285,296,295,334,282,293,283,251,301,300]
-    
+    //static let rightEyeBrow: [Int] = [71,70,63,53,105,52,66,65,107,55]
+   // static let leftEyeBrow: [Int] = [336,285,296,295,334,282,293,283,301,300]
+    static let rightEyeBrow: [Int] = [70,63,105,66,107,55,65,52,53,46]
+    static let leftEyeBrow: [Int] = [336,296,334,293,300,276,283,282,295,285]
     static let  outerLipsPoints: [Int] = [
         61, 146, 91, 181, 84, 17,
         314, 405, 321, 375, 291,
@@ -60,7 +61,6 @@ enum FaceParsingIndex {
         417, 351, 412, 419, 399, 248, 456, 437, 420, 355, 429, 363, 360,
         281, 275, 274, 344, 438, 460, 327, 326, 290, 279, 371, 278, 358,
         331, 294, 277, 465,331,294
-        
     ]
     
     static let noseIndicesc = [
@@ -68,6 +68,8 @@ enum FaceParsingIndex {
     ]
     
     static let boundary = [244,245,189,413,464,453]
+    
+    static let neckIndices = [136,150,149,176,148,152,377,400,378,379,365]
 
 }
 
@@ -84,6 +86,10 @@ struct FaceTuneFilterModelV2 {
     var eyeBrightnessFilterModel: EyeBrightnessFilterModel = .init()
     var teethWhiteningModel: TeethWhiteningFilterModel = .init()
     var lipsBrighterModel: LipsBrightenFilterModel = .init()
+    var eyeBrowBrightenModel: EyeBrowBrightenFilterModel = .init()
+    var neckShadowFilterModel: NeckShadowFilterModel = .init()
+    var faceShdowModel: FaceShadowModel = .init()
+    var teethWhitenFilterModel: TeethWhiteningFilterModel = .init()
     var imageSize: CGSize = .zero
     let allCat = FilteryType.allCases
     
@@ -155,21 +161,44 @@ struct FaceTuneFilterModelV2 {
                     eyeBrightnessFilterModel.scaleFactor = scaleValue
                 }
                 if eyeBrightnessFilterModel.scaleFactor != 0.0 {
-                    //outputImage = self.applyEyeBrightnessFilter(image: outputImage)
+                    outputImage = self.applyEyeBrightnessFilter(image: outputImage)
                 }
             case .teethWhitening:
                 if category == filterCategory {
                     teethWhiteningModel.scaleFactor = scaleValue
                 }
                 if teethWhiteningModel.scaleFactor != 0.0 {
-                    //outputImage = self.applyTeethWhiteningFilter(image: outputImage)
+                    outputImage = self.applyTeethWhiteningFilter(image: outputImage)
                 }
             case .brighterLips:
                 if category == filterCategory {
                     lipsBrighterModel.scaleFactor = CGFloat(scaleValue)
                 }
                 if lipsBrighterModel.scaleFactor != 0.0 {
-                    //outputImage = self.applyLipsBrighterFilter(inputImage: outputImage)
+                    outputImage = self.applyLipsBrighterFilter(image: outputImage)
+                }
+            case .EyeBrowsConstrast:
+                if category == filterCategory {
+                    eyeBrowBrightenModel.scaleFactor = CGFloat(scaleValue)
+                }
+                if eyeBrowBrightenModel.scaleFactor != 0.0 {
+                    outputImage = self.applyEyeBrowBrightnessFilter(image: outputImage)
+                }
+                
+            case .neeckShadow:
+                if category == filterCategory {
+                    neckShadowFilterModel.scaleFactor = CGFloat(scaleValue)
+                }
+                if neckShadowFilterModel.scaleFactor != 0.0 {
+                    outputImage = self.applyNeckShadowFilter(image: outputImage)
+                }
+                
+            case .shadow:
+                if category == filterCategory {
+                    faceShdowModel.scaleFactor = CGFloat(scaleValue)
+                }
+                if faceShdowModel.scaleFactor != 0.0 {
+                    outputImage = self.applyFaceShadowFilter(image: outputImage)
                 }
             
             default: break
@@ -179,12 +208,339 @@ struct FaceTuneFilterModelV2 {
     }
 }
 
+extension FaceTuneFilterModelV2 {
+    mutating func applyTeethWhiteningFilter(image: MTIImage) -> MTIImage {
+        let filter = TeethBrighterFilterV2()
+        
+        filter.scaleFactor = Float(teethWhiteningModel.scaleFactor)
+        filter.outerLipsPoint = teethWhiteningModel.outerPoints
+        filter.innerLipsPoint = teethWhiteningModel.innerPoints
+        filter.inputImage = image
+        
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return image
+    }
+}
+
+extension FaceTuneFilterModelV2 {
+    mutating func applyFaceShadowFilter(image: MTIImage) -> MTIImage {
+       
+        let filter = FaceShadowMetalFilter()
+        
+        filter.faceScaleFactor = Float(self.faceShdowModel.scaleFactor)
+        filter.inputImage = image
+        filter.faceRectCenter = self.faceShdowModel.faceCenter
+        filter.faceRectRadius = self.faceShdowModel.faceRadius
+        filter.rotation = self.faceShdowModel.rotation
+        filter.point = self.faceShdowModel.smoothCurveFast
+        
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return image
+    }
+    
+    mutating func updateFaceShadowFilter() {
+        self.faceShdowModel.scaleFactor = 0.0
+        let faceOveralPoints: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.faceOvalIndices)
+        let normalizedPoint = self.getNoramlizePoint(points: faceOveralPoints)
+        
+        let simdPoints: [SIMD2<Float>] = normalizedPoint.map { point in
+            SIMD2(Float(point.x) / Float(imageSize.width),
+                  Float(point.y) / Float(imageSize.height))
+        }
+       // let polygonImg = self.polygonMaskImage(points: normalizedPoint, size: self.imageSize)
+        
+        //let image = CIImage(cgImage: polygonImg!.cgImage!)
+        
+        debugPrint("Pintssss",normalizedPoint,faceOveralPoints,FaceParsingIndex.faceOvalIndices)
+        
+        
+        let center = self.polygonCenter(points: normalizedPoint)
+        let radius = self.polygonMaxRadius(points: normalizedPoint, center: center)
+        //let maxRadius = self.maxDistance(points: normalizedPoint, center: center)
+        
+        let texWidth  = Float((self.imageSize.width))
+        let texHeight = Float((self.imageSize.height))
+        
+        
+
+        let faceCenter = SIMD2<Float>(
+            Float(center.x / texWidth),
+            Float(center.y / texHeight) // flip Y
+        )
+
+        let faceRadius = SIMD2<Float>(
+            Float(radius / texWidth),
+            Float(radius / texWidth)
+        )
+        self.faceShdowModel.faceCenter = faceCenter
+        self.faceShdowModel.faceRadius = faceRadius
+        self.faceShdowModel.rotation = 0.0
+        self.faceShdowModel.smoothCurveFast = simdPoints
+    }
+}
+
+extension FaceTuneFilterModelV2 {
+    mutating func updateNeckShadow() {
+        let neckShadowPoint: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.neckIndices)
+        let neckShadowNormalized = self.getNoramlizePoint(points: neckShadowPoint)
+        
+        
+        let neckShadowNormalizedSimd: [SIMD2<Float>] = neckShadowNormalized.map {
+            SIMD2(Float($0.x),
+                  Float($0.y))
+        }
+        
+      //  let finalNeckShadowPolygon = self.makeSmartNeckShadowPolygon(jawPoints: neckShadowNormalizedSimd,
+                                                               // offset: 60)
+        
+        let texWidth = Float(imageSize.width)
+        let texHeight = Float(imageSize.height)
+
+        let finalNeckShadowPolygonNoramlized: [SIMD2<Float>] = neckShadowNormalizedSimd.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+        neckShadowFilterModel.jawPoints = finalNeckShadowPolygonNoramlized
+        neckShadowFilterModel.scaleFactor = 0.0
+        debugPrint("neck Shadow Noramlized Point",finalNeckShadowPolygonNoramlized, neckShadowNormalizedSimd)
+        
+    }
+    
+    func makeSmartNeckShadowPolygon(jawPoints: [SIMD2<Float>], offset: Float) -> [SIMD2<Float>] {
+        guard jawPoints.count > 1 else { return [] }
+        
+        var offsetPoints: [SIMD2<Float>] = []
+        
+        for i in 0..<jawPoints.count {
+            let p = jawPoints[i]
+            
+            // Tangent: average of prev & next
+            var tangent = SIMD2<Float>(0, 0)
+            if i > 0 {
+                tangent += simd_normalize(jawPoints[i] - jawPoints[i-1])
+            }
+            if i < jawPoints.count - 1 {
+                tangent += simd_normalize(jawPoints[i+1] - jawPoints[i])
+            }
+            
+            tangent = simd_normalize(tangent)
+            
+            // Perpendicular normal
+            var normal = SIMD2<Float>(-tangent.y, tangent.x)
+            
+            // Ensure normal points downward (positive y)
+            if normal.y < 0 {
+                normal = -normal
+            }
+            
+            let offsetPoint = p + normal * offset
+            offsetPoints.append(offsetPoint)
+        }
+        
+        // Polygon = top (jawline) + bottom (reversed offset)
+        return jawPoints + offsetPoints.reversed()
+    }
+    
+    mutating func applyNeckShadowFilter(image: MTIImage) -> MTIImage {
+        let filter = NeckShadowMetalFilter()
+        filter.scaleFactor =  Float(neckShadowFilterModel.scaleFactor)
+        filter.jawPoints = neckShadowFilterModel.jawPoints
+        filter.inputImage = image
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return image
+    }
+
+}
+
+extension FaceTuneFilterModelV2 {
+    mutating func updateEyeBrowContrast() {
+        
+        let leftBrowpoints: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.leftEyeBrow)
+        let rightEyeBrowPoints: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.rightEyeBrow)
+        
+        
+        let leftBrowpointsNormalized = self.getNoramlizePoint(points: leftBrowpoints)
+        
+        let rightBrowpointsNormalized = self.getNoramlizePoint(points: rightEyeBrowPoints)
+        
+    
+        let texWidth = Float(imageSize.width)
+        let texHeight = Float(imageSize.height)
+
+        let leftContourPointsNormalized: [SIMD2<Float>] = leftBrowpointsNormalized.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+        let rightContourPointsNormalized: [SIMD2<Float>] = rightBrowpointsNormalized.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+       // let orderPointsleft = self.orderBrowPolygonByAngle(leftContourPointsNormalized)
+        //let orderPointsright = self.orderBrowPolygonByAngle(rightContourPointsNormalized)
+        //debugPrint("Eye Brow Points ", orderPointsleft, leftBrowpointsNormalized, rightBrowpointsNormalized, orderPointsright)
+        
+        eyeBrowBrightenModel.leftPoints = leftContourPointsNormalized
+        eyeBrowBrightenModel.rightPoints = rightContourPointsNormalized
+        eyeBrowFilterModel.scaleFactor = 0.0
+    }
+    
+    func orderBrowPolygonByAngle(_ points: [SIMD2<Float>]) -> [SIMD2<Float>] {
+        // 1. Find centroid
+        let center = points.reduce(SIMD2<Float>(0,0)) { $0 + $1 } / Float(points.count)
+        
+        // 2. Sort points by angle from center
+        let sorted = points.sorted {
+            let angle0 = atan2($0.y - center.y, $0.x - center.x)
+            let angle1 = atan2($1.y - center.y, $1.x - center.x)
+            return angle0 < angle1
+        }
+        
+        return sorted
+    }
+
+    mutating func applyEyeBrowBrightnessFilter(image: MTIImage) -> MTIImage {
+        let filter = EyeBrowMetalFilter()
+        filter.scaleFactor =  Float(eyeBrowBrightenModel.scaleFactor)
+        filter.leftbrowPoints = eyeBrowBrightenModel.leftPoints
+        filter.rightbrowPoints = eyeBrowBrightenModel.rightPoints
+        filter.inputImage = image
+        
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return image
+    }
+    
+}
+
+
+extension FaceTuneFilterModelV2 {
+    mutating func updateEyeContrast() {
+        let leftEyeContourIndices: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.leftEyeContourIndices)
+        let rightEyeContourIndices: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.rightEyeContourIndices)
+        
+        let leftEyeIrisIndices: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.leftIrisIndices)
+        let rightEyeIrisIndices: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.rightIrisIndices)
+        
+        
+        let leftEyeContourPoints: [CGPoint] = self.getNoramlizePoint(points: leftEyeContourIndices)
+        let rightEyeContourPoints: [CGPoint] = self.getNoramlizePoint(points: rightEyeContourIndices)
+        
+        let leftEyeIrisPoint: [CGPoint] = self.getNoramlizePoint(points: leftEyeIrisIndices)
+        let rightEyeIrisPoints: [CGPoint] = self.getNoramlizePoint(points: rightEyeIrisIndices)
+        
+        
+        //let innerLipsNormalizedPoint = self.getNoramlizePoint(points: innerLipsPoint)
+        //let outerLipsNormalizedPoint = self.getNoramlizePoint(points: outerLipsPoint)
+        
+        let texWidth = Float(imageSize.width)
+        let texHeight = Float(imageSize.height)
+
+        let leftContourPointsNormalized: [SIMD2<Float>] = leftEyeContourPoints.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+        let rightContourPointsNormalized: [SIMD2<Float>] = rightEyeContourPoints.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+        let leftIrisPointsNormalized: [SIMD2<Float>] = leftEyeIrisPoint.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+        let rightIrisPointsNormalized: [SIMD2<Float>] = rightEyeIrisPoints.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+        eyeBrightnessFilterModel.scaleFactor = 0
+        eyeBrightnessFilterModel.leftEyePoints = leftContourPointsNormalized
+        eyeBrightnessFilterModel.leftIrisPoints = leftIrisPointsNormalized
+        eyeBrightnessFilterModel.rightEyePoints = rightContourPointsNormalized
+        eyeBrightnessFilterModel.rightIrisPoints = rightIrisPointsNormalized
+        
+        debugPrint("Left and right Points", leftIrisPointsNormalized, rightIrisPointsNormalized)
+        
+    }
+    
+    mutating func applyEyeBrightnessFilter(image: MTIImage) -> MTIImage {
+        let filter = EyeConstrastMetalFilterV2()
+        
+        filter.scaleFactor = Float(eyeBrightnessFilterModel.scaleFactor)
+        filter.leftEyeIrisPoints = eyeBrightnessFilterModel.leftIrisPoints
+        filter.leftEyeContourPoints = eyeBrightnessFilterModel.leftEyePoints
+        filter.rightEyeIrisPoints = eyeBrightnessFilterModel.rightIrisPoints
+        filter.rightEyeContourPoints = eyeBrightnessFilterModel.rightEyePoints
+        filter.inputImage = image
+        
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return image
+    }
+}
+
+extension FaceTuneFilterModelV2 {
+    mutating func updateLipsContrastFilterModel() {
+        let innerLipsPoint: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.innerLipsIndices)
+        let innerLipsNormalizedPoint = self.getNoramlizePoint(points: innerLipsPoint)
+        let outerLipsPoint: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.outerLipsPoints)
+        let outerLipsNormalizedPoint = self.getNoramlizePoint(points: outerLipsPoint)
+        
+        let texWidth = Float(imageSize.width)
+        let texHeight = Float(imageSize.height)
+
+        let noramlizedOuter: [SIMD2<Float>] = outerLipsNormalizedPoint.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+        let noramlizedInner: [SIMD2<Float>] = innerLipsNormalizedPoint.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }
+        
+        lipsBrighterModel.outerPoints = noramlizedOuter
+        lipsBrighterModel.innerPoints = noramlizedInner
+        lipsBrighterModel.scaleFactor = 0.0
+        
+        teethWhiteningModel.outerPoints = noramlizedOuter
+        teethWhiteningModel.innerPoints = noramlizedInner
+        teethWhiteningModel.scaleFactor = 0.0
+        debugPrint("Inner Lips and OuterLips Count", outerLipsNormalizedPoint, innerLipsNormalizedPoint)
+    }
+    
+    mutating func applyLipsBrighterFilter(image: MTIImage) -> MTIImage {
+        let filter = LipsBrighterFilterV2()
+        
+        filter.scaleFactor = Float(lipsBrighterModel.scaleFactor)
+        filter.outerLipsPoint = lipsBrighterModel.outerPoints
+        filter.innerLipsPoint = lipsBrighterModel.innerPoints
+        filter.inputImage = image
+        
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return image
+    }
+}
 
 extension FaceTuneFilterModelV2 {
     mutating func updateEyelashFilterModel() {
         
-        let rightEyeContourIndices: [Int] = [33, 7, 163, 144, 145, 153, 154, 155, 133]
-        //133, 173, 157, 158, 159, 160, 161, 246
+        let rightEyeContourIndices: [Int] = [7, 163, 144, 145, 153, 154,133, 158, 159, 160, 161]
         let righteyelashesIndices: [CGPoint] = self.getSpecificFaceIndices(indices: rightEyeContourIndices)
         let normalizedPoint = self.getNoramlizePoint(points: righteyelashesIndices)
         
