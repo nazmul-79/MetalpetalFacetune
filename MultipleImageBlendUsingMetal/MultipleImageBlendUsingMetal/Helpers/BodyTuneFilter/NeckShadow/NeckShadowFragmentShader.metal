@@ -83,8 +83,8 @@ fragment float4 neckShadowShader(
     float factor = clamp(scaleFactor / 100.0, -1.0, 1.0);
 
     // --- Shadow / highlight strengths ---
-    float maxDark = 0.3;  // subtle shadow
-    float maxLight = 0.2; // subtle highlight
+    float maxDark = 0.2;  // subtle shadow
+    float maxLight = 0.1; // subtle highlight
 
     float3 adjustedColor;
 
@@ -100,7 +100,7 @@ fragment float4 neckShadowShader(
 
     return float4(adjustedColor, alpha);*/
     
-   /* constexpr sampler s(address::clamp_to_edge, filter::linear);
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
         float2 uv = in.textureCoordinate;
 
         float4 texColor = tex.sample(s, uv);
@@ -134,7 +134,7 @@ fragment float4 neckShadowShader(
 
         return float4(finalColor, alpha);*/
     
-    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
     float2 uv = in.textureCoordinate;
 
     float4 texColor = tex.sample(s, uv);
@@ -182,7 +182,239 @@ fragment float4 neckShadowShader(
         adjustedColor = base + (1.0 - base) * mask * (-factor) * maxLight;
     }
     adjustedColor = clamp(adjustedColor, 0.0, 1.0);
+    return float4(adjustedColor, alpha);*/
+    
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
+        float2 uv = in.textureCoordinate;
+
+        float4 texColor = tex.sample(s, uv);
+        if (texColor.a < 0.01) return texColor;
+
+        float3 base = texColor.rgb;
+
+        // --- Signed distance to jaw polygon ---
+        float dJaw = signedDistancePolygon(uv, jawPoints, outerCount);
+
+        // --- Soft edge mask ---
+        float feather = 0.06;
+        float mask = 1.0 - smoothstep(-feather, feather, dJaw);
+        mask = mask * mask * (3.0 - 2.0 * mask);
+
+        // --- Find polygon vertical bounds ---
+        float2 minP = jawPoints[0];
+        float2 maxP = jawPoints[0];
+        for (uint i = 1; i < outerCount; i++) {
+            minP = float2(min(minP.x, jawPoints[i].x), min(minP.y, jawPoints[i].y));
+            maxP = float2(max(maxP.x, jawPoints[i].x), max(maxP.y, jawPoints[i].y));
+        }
+
+        // --- Gradient rising from bottom (shadow under jawline) ---
+        float gradientY = smoothstep(minP.y - 0.05, maxP.y + 0.05, uv.y);
+        float bottomUpFalloff = pow(1.0 - gradientY, 2.0); // stronger below, fades upward
+
+        // --- Combine polygon mask + bottom-up gradient ---
+        float shadowMask = mask * bottomUpFalloff;
+
+        // --- Normalize strength (-1 to 1) ---
+        float factor = clamp(scaleFactor / 100.0, -1.0, 1.0);
+
+        float maxDark = 0.45; // slightly stronger for under-jaw
+        float maxLight = 0.25;
+
+        float3 adjustedColor;
+
+        if (factor > 0.0) {
+            // Darken from below the jaw upward
+            adjustedColor = base * (1.0 - shadowMask * factor * maxDark);
+        } else {
+            // Optional lighten upward if negative
+            adjustedColor = base + (1.0 - base) * shadowMask * (-factor) * maxLight;
+        }
+
+        adjustedColor = clamp(adjustedColor, 0.0, 1.0);
+
+        return float4(adjustedColor, texColor.a);*/
+    
+   /* constexpr sampler s(address::clamp_to_edge, filter::linear);
+       float2 uv = in.textureCoordinate;
+
+       float4 texColor = tex.sample(s, uv);
+       if (texColor.a < 0.01) return texColor;
+       float3 base = texColor.rgb;
+
+       // --- Determine top and bottom polygon bounds from jaw points ---
+       float2 minP = jawPoints[0];
+       float2 maxP = jawPoints[0];
+       for (uint i = 1; i < outerCount; i++) {
+           minP = float2(min(minP.x, jawPoints[i].x), min(minP.y, jawPoints[i].y));
+           maxP = float2(max(maxP.x, jawPoints[i].x), max(maxP.y, jawPoints[i].y));
+       }
+
+       // add vertical offset for shadow (e.g., ~30 px in UV space)
+       float shadowOffset = 0.03; // tweak this to control shadow height
+       maxP.y += shadowOffset;
+
+       // --- Check if pixel is inside polygon horizontally and vertically ---
+       bool insideX = uv.x >= minP.x && uv.x <= maxP.x;
+       bool insideY = uv.y >= minP.y && uv.y <= maxP.y;
+
+       float mask = 0.0;
+       if (insideX && insideY) {
+           // stronger at top, fades to bottom
+           float verticalFalloff = 1.0 - (uv.y - minP.y) / (maxP.y - minP.y);
+           mask = pow(clamp(verticalFalloff, 0.0, 1.0), 1.5); // smooth top→bottom
+       }
+
+       // --- Normalize factor (-1..1) ---
+       float factor = clamp(scaleFactor / 100.0, -1.0, 1.0);
+       float maxDark = 0.35;
+       float maxLight = 0.25;
+
+       float3 adjustedColor;
+       if (factor > 0.0) {
+           // dark shadow
+           adjustedColor = base * (1.0 - mask * factor * maxDark);
+       } else {
+           // optional light shadow
+           adjustedColor = base + (1.0 - base) * mask * (-factor) * maxLight;
+       }
+
+       adjustedColor = clamp(adjustedColor, 0.0, 1.0);
+       return float4(adjustedColor, texColor.a);*/
+    
+   /* constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = in.textureCoordinate;
+
+    float4 texColor = tex.sample(s, uv);
+    float alpha = texColor.a;
+    if (alpha < 0.01) return texColor;
+
+    float3 base = texColor.rgb;
+
+    // --- Distance mask ---
+    float dJaw = signedDistancePolygon(uv, jawPoints, outerCount);
+
+    // Feather / soft edges
+    float feather = 0.06;  // increased for very smooth blending
+    float mask = 1.0 - smoothstep(-feather, feather, dJaw);
+
+    // Smooth corners using cubic smoothstep
+    mask = mask*mask*(3.0 - 2.0*mask);
+
+    // --- Normalize slider -100..100 → -1..1 ---
+    float factor = clamp(scaleFactor / 100.0, -1.0, 1.0);
+
+    // --- Shadow / highlight strengths ---
+    float maxDark = 0.35;  // subtle shadow
+    float maxLight = 0.25; // subtle highlight
+
+    float3 adjustedColor;
+    if (factor > 0.0) {
+        // Darker: apply smooth shadow
+        adjustedColor = base * (1.0 - mask * factor * maxDark);
+    } else {
+        // Lighter: apply smooth highlight
+        adjustedColor = base + (1.0 - base) * mask * (-factor) * maxLight;
+    }
+
+    adjustedColor = clamp(adjustedColor, 0.0, 1.0);
+
+    return float4(adjustedColor, alpha);*/
+    
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = in.textureCoordinate;
+
+    float4 texColor = tex.sample(s, uv);
+    float alpha = texColor.a;
+    if (alpha < 0.01) return texColor;
+
+    float3 base = texColor.rgb;
+
+    // --- Distance mask for jaw polygon ---
+    float dJaw = signedDistancePolygon(uv, jawPoints, outerCount);
+
+    // Feather / soft edges
+    float feather = 0.06;
+    float mask = 1.0 - smoothstep(-feather, feather, dJaw);
+    mask = mask * mask * (3.0 - 2.0 * mask); // cubic smoothstep
+
+    // --- Horizontal falloff from center ---
+    float minX = jawPoints[0].x;
+    float maxX = jawPoints[0].x;
+    for (uint i = 1; i < outerCount; i++) {
+        minX = min(minX, jawPoints[i].x);
+        maxX = max(maxX, jawPoints[i].x);
+    }
+    float centerX = (minX + maxX) * 0.5;
+    float horizFalloff = 1.0 - abs(uv.x - centerX) / ((maxX - minX) * 0.5);
+    horizFalloff = pow(clamp(horizFalloff, 0.0, 1.0), 1.5); // softer on sides
+
+    // --- Combine vertical mask (from polygon) with horizontal falloff ---
+    mask *= horizFalloff;
+
+    // --- Normalize factor ---
+    float factor = clamp(scaleFactor / 100.0, -1.0, 1.0);
+    float maxDark = 0.35;
+    float maxLight = 0.25;
+
+    float3 adjustedColor;
+    if (factor > 0.0) {
+        adjustedColor = base * (1.0 - mask * factor * maxDark); // shadow down
+    } else {
+        adjustedColor = base + (1.0 - base) * mask * (-factor) * maxLight; // highlight
+    }
+
+    adjustedColor = clamp(adjustedColor, 0.0, 1.0);
+    return float4(adjustedColor, alpha);*/
+    
+    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = in.textureCoordinate;
+
+    float4 texColor = tex.sample(s, uv);
+    float alpha = texColor.a;
+    if (alpha < 0.01) return texColor;
+
+    float3 base = texColor.rgb;
+
+    // --- Polygon distance mask ---
+    float dJaw = signedDistancePolygon(uv, jawPoints, outerCount);
+    float feather = 0.06;
+    float mask = 1.0 - smoothstep(-feather, feather, dJaw);
+    mask = mask * mask * (3.0 - 2.0 * mask); // cubic smoothstep
+
+    // --- Horizontal falloff (center → sides) ---
+    float minX = jawPoints[0].x;
+    float maxX = jawPoints[0].x;
+    for (uint i = 1; i < outerCount; i++) {
+        minX = min(minX, jawPoints[i].x);
+        maxX = max(maxX, jawPoints[i].x);
+    }
+    float centerX = (minX + maxX) * 0.5;
+
+    // wider horizontal effect: increase denominator slightly
+    float horizRange = (maxX - minX) * 0.75; // increase from 0.5 to 0.75
+    float horizFalloff = 1.0 - abs(uv.x - centerX) / horizRange;
+    horizFalloff = pow(clamp(horizFalloff, 0.0, 1.0), 1.2); // softer exponent
+
+    mask *= horizFalloff;
+
+    // --- Factor ---
+    float factor = clamp(scaleFactor / 100.0, -1.0, 1.0);
+    float maxDark = 0.25;
+    float maxLight = 0.15;
+
+    float3 adjustedColor;
+    if (factor > 0.0) {
+        adjustedColor = base * (1.0 - mask * factor * maxDark); // shadow
+    } else {
+        adjustedColor = base + (1.0 - base) * mask * (-factor) * maxLight; // highlight
+    }
+
+    adjustedColor = clamp(adjustedColor, 0.0, 1.0);
     return float4(adjustedColor, alpha);
+
+
+    
 }
 
     

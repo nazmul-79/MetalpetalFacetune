@@ -105,6 +105,10 @@ struct FaceShadowModel {
 struct EyelashFilterModel {
     var scaleFactor: Float = 0
     var curveFast: [SIMD2<Float>] = []
+    var rightEyeUpIndices: [SIMD2<Float>] = []
+    var rightEyeDownIndices: [SIMD2<Float>] = []
+    var leftEyeUpIndices: [SIMD2<Float>] = []
+    var leftEyeDownIndices: [SIMD2<Float>] = []
 }
 
 struct EyeBrightnessFilterModel {

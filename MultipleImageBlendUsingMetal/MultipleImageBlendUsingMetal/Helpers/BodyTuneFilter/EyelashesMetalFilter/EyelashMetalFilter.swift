@@ -17,7 +17,10 @@ class EyelashMetalFilterV2: NSObject, MTIFilter {
 
     // Nose parameters
     var scaleFactor: Float = 0.0
-    var point: [SIMD2<Float>] = []
+    var rightUpPoints: [SIMD2<Float>] = []
+    var rightDownPoints: [SIMD2<Float>] = []
+    var leftUpPoints: [SIMD2<Float>] = []
+    var leftDownPoints: [SIMD2<Float>] = []
     
     //let dataBuffer = MTIDataBuffer(bytes: <#T##UnsafeRawPointer#>, length: <#T##UInt#>)
 
@@ -34,12 +37,20 @@ class EyelashMetalFilterV2: NSObject, MTIFilter {
     var outputImage: MTIImage? {
         guard let inputImage = inputImage else { return nil }
         
-        guard let pointBuffer = MTIDataBuffer(bytes: &point, length: UInt(MemoryLayout<SIMD2<Float>>.size * point.count)) else {return nil}
+        guard let rUppointBuffer = MTIDataBuffer(bytes: &rightUpPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * rightUpPoints.count)) else {return nil}
+        
+        guard let rDownpointBuffer = MTIDataBuffer(bytes: &rightDownPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * rightDownPoints.count)) else {return nil}
+        
+        guard let lUppointBuffer = MTIDataBuffer(bytes: &leftUpPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * leftUpPoints.count)) else {return nil}
+        
+        guard let lDownpointBuffer = MTIDataBuffer(bytes: &leftDownPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * leftDownPoints.count)) else {return nil}
 
         let parameters: [String: Any] = [
             "scaleFactor": scaleFactor,
-            "points": pointBuffer,
-            "count": UInt(point.count)
+            "rightUpPoints": rUppointBuffer,
+            "rightDownPoints": rDownpointBuffer,
+            "leftUpPoints": lUppointBuffer,
+            "leftDownPoints": lDownpointBuffer,
         ]
 
         return Self.kernel.apply(to: inputImage, parameters: parameters)

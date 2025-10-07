@@ -78,8 +78,8 @@
             filePath = "MultipleImageBlendUsingMetal/Helpers/BodyTuneModel/FaceTuneFilterModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "853"
-            endingLineNumber = "853"
+            startingLineNumber = "857"
+            endingLineNumber = "857"
             landmarkName = "FaceTuneFilterModel"
             landmarkType = "21">
          </BreakpointContent>
@@ -94,8 +94,8 @@
             filePath = "MultipleImageBlendUsingMetal/Helpers/BodyTuneModel/FaceTuneFilterModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "891"
-            endingLineNumber = "891"
+            startingLineNumber = "895"
+            endingLineNumber = "895"
             landmarkName = "FaceTuneFilterModel"
             landmarkType = "21">
          </BreakpointContent>
@@ -110,8 +110,8 @@
             filePath = "MultipleImageBlendUsingMetal/Helpers/BodyTuneModel/FaceTuneFilterModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1096"
-            endingLineNumber = "1096"
+            startingLineNumber = "1100"
+            endingLineNumber = "1100"
             landmarkName = "FaceTuneFilterModel"
             landmarkType = "21">
          </BreakpointContent>
@@ -126,10 +126,40 @@
             filePath = "MultipleImageBlendUsingMetal/Helpers/BodyTuneModel/FaceTuneFilterModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1209"
-            endingLineNumber = "1209"
+            startingLineNumber = "1213"
+            endingLineNumber = "1213"
             landmarkName = "createInnerLipsMask(points:imageSize:padding:shrinkFactor:verticalOffset:boundaryWidth:cornerRadius:)"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "746BCEC8-2931-4986-ABAC-190133F0A94E - 1b2084baf4985f5"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MultipleImageBlendUsingMetal.FaceTuneFilterModel.createInnerLipsMask(points: Swift.Array&lt;__C.CGPoint&gt;, imageSize: __C.CGSize, padding: CoreGraphics.CGFloat, shrinkFactor: CoreGraphics.CGFloat, verticalOffset: CoreGraphics.CGFloat, boundaryWidth: CoreGraphics.CGFloat, cornerRadius: CoreGraphics.CGFloat) -&gt; Swift.Optional&lt;__C.MTIImage&gt;"
+                  moduleName = "MultipleImageBlendUsingMetal.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bcldevice8/Desktop/MetalpetalFacetune/MultipleImageBlendUsingMetal/MultipleImageBlendUsingMetal/Helpers/BodyTuneModel/FaceTuneFilterModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1211"
+                  endingLineNumber = "1211">
+               </Location>
+               <Location
+                  uuid = "746BCEC8-2931-4986-ABAC-190133F0A94E - 1b2084baf498537"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "MultipleImageBlendUsingMetal.FaceTuneFilterModel.createInnerLipsMask(points: Swift.Array&lt;__C.CGPoint&gt;, imageSize: __C.CGSize, padding: CoreGraphics.CGFloat, shrinkFactor: CoreGraphics.CGFloat, verticalOffset: CoreGraphics.CGFloat, boundaryWidth: CoreGraphics.CGFloat, cornerRadius: CoreGraphics.CGFloat) -&gt; Swift.Optional&lt;__C.MTIImage&gt;"
+                  moduleName = "MultipleImageBlendUsingMetal.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/bcldevice8/Desktop/MetalpetalFacetune/MultipleImageBlendUsingMetal/MultipleImageBlendUsingMetal/Helpers/BodyTuneModel/FaceTuneFilterModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1213"
+                  endingLineNumber = "1213">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

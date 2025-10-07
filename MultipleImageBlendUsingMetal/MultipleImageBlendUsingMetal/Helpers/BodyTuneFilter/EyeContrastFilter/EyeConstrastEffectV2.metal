@@ -239,7 +239,7 @@ fragment float4 eyeContrastShader(VertexOut in [[stage_in]],
 
     return float4(adjusted, color.a);*/
     
-    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
     float2 uv = in.textureCoordinate;
     float4 color = tex.sample(s, uv);
     float3 base = color.rgb;
@@ -296,6 +296,76 @@ fragment float4 eyeContrastShader(VertexOut in [[stage_in]],
     }
 
     // --- Final blend using eyeMask for smooth edge ---
+    float3 finalColor = mix(base, adjusted, eyeMask);
+
+    return float4(finalColor, color.a);*/
+    
+    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = in.textureCoordinate;
+    float4 color = tex.sample(s, uv);
+    float3 base = color.rgb;
+
+    // --- Distance fields for eyes ---
+    float dLeft  = signedDistancePolygon(uv, leftContourPoints, leftContourCount);
+    float dRight = signedDistancePolygon(uv, rightContourPoints, rightContourCount);
+
+    // --- Eye mask with soft feather ---
+    float feather = 0.025;
+    float leftMask  = 1.0 - smoothstep(-feather, feather, dLeft);
+    float rightMask = 1.0 - smoothstep(-feather, feather, dRight);
+    float eyeMaskRaw = max(leftMask, rightMask);
+
+    // --- Eye centroid ---
+    float2 eyeCentroid = float2(0.0);
+    for (uint i = 0; i < leftContourCount; i++) eyeCentroid += leftContourPoints[i];
+    for (uint i = 0; i < rightContourCount; i++) eyeCentroid += rightContourPoints[i];
+    eyeCentroid /= float(leftContourCount + rightContourCount);
+
+    // --- Radial falloff ---
+    float distanceToCenter = distance(uv, eyeCentroid);
+    float radial = 1.0 - smoothstep(0.0, 0.35, distanceToCenter);
+
+    // --- Combined eye mask (softer) ---
+    float eyeMask = eyeMaskRaw * radial;
+    eyeMask = clamp(eyeMask, 0.0, 1.0);
+
+    // --- Normalize scale factor ---
+    float factor = clamp(scaleFactor / 50.0, -1.0, 1.0);
+
+    // Skip if no effect needed
+    if (abs(factor) < 0.01) return color;
+
+    // --- Adjust per pixel ---
+    float3 adjusted = base;
+
+    if (factor > 0.0) {
+        // SUBTLE brightness + contrast enhancement
+        float brightness = 0.3 * factor; // Reduced from 0.8
+        float contrast = 1.0 + 0.2 * factor; // Reduced from 0.4
+        
+        // Apply contrast first
+        adjusted = (base - 0.5) * contrast + 0.5;
+        // Then add subtle brightness
+        adjusted += brightness;
+        
+        // Clamp to avoid overexposure
+        adjusted = clamp(adjusted, 0.0, 1.0);
+        
+    } else if (factor < 0.0) {
+        // SUBTLE darken + contrast reduction
+        float darken = 0.3 * (-factor); // Reduced from 0.7
+        float contrast = 1.0 - 0.15 * (-factor); // Reduced from 0.3
+        
+        // Apply contrast first
+        adjusted = (base - 0.5) * contrast + 0.5;
+        // Then subtract darken
+        adjusted -= darken;
+        
+        // Clamp to avoid complete black
+        adjusted = clamp(adjusted, 0.0, 1.0);
+    }
+
+    // --- Final blend with smooth mask ---
     float3 finalColor = mix(base, adjusted, eyeMask);
 
     return float4(finalColor, color.a);

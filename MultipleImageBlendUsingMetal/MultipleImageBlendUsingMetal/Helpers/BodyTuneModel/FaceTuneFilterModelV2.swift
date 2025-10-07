@@ -9,7 +9,7 @@ import MetalPetal
 import MediaPipeTasksVision
 
 enum FaceParsingIndex {
-    static let rightEyeContourIndices: [Int] = [33, 7, 163, 144, 145, 153, 154, 155,133, 173, 157, 158, 159, 160, 161, 246]
+    static let rightEyeContourIndices: [Int] = [33, 7, 163, 144, 145, 153, 154, 155, 173, 157, 158, 159, 160, 161, 246]
     static let rightEyelidIndices: [Int] = [190,56,28,27,29,30,247,130,25,110,24,23,22,26,112,243]
     
     static let rightEyelidAndContourIndices = FaceParsingIndex.rightEyelidIndices + FaceParsingIndex.rightEyeContourIndices
@@ -294,13 +294,15 @@ extension FaceTuneFilterModelV2 {
                   Float($0.y))
         }
         
-      //  let finalNeckShadowPolygon = self.makeSmartNeckShadowPolygon(jawPoints: neckShadowNormalizedSimd,
-                                                               // offset: 60)
+        let finalNeckShadowPolygon = self.shiftJawPointsDown(jawPoints: neckShadowNormalizedSimd,
+                                                                     offset: 70)
+        
+        debugPrint("finalNeckShadowPolygon", finalNeckShadowPolygon,neckShadowNormalizedSimd)
         
         let texWidth = Float(imageSize.width)
         let texHeight = Float(imageSize.height)
 
-        let finalNeckShadowPolygonNoramlized: [SIMD2<Float>] = neckShadowNormalizedSimd.map {
+        let finalNeckShadowPolygonNoramlized: [SIMD2<Float>] = finalNeckShadowPolygon.map {
             SIMD2(Float($0.x) / texWidth,
                   Float($0.y) / texHeight)
         }
@@ -311,7 +313,7 @@ extension FaceTuneFilterModelV2 {
         
     }
     
-    func makeSmartNeckShadowPolygon(jawPoints: [SIMD2<Float>], offset: Float) -> [SIMD2<Float>] {
+   /* func makeSmartNeckShadowPolygon(jawPoints: [SIMD2<Float>], offset: Float) -> [SIMD2<Float>] {
         guard jawPoints.count > 1 else { return [] }
         
         var offsetPoints: [SIMD2<Float>] = []
@@ -344,7 +346,13 @@ extension FaceTuneFilterModelV2 {
         
         // Polygon = top (jawline) + bottom (reversed offset)
         return jawPoints + offsetPoints.reversed()
+    }*/
+    
+    func shiftJawPointsDown(jawPoints: [SIMD2<Float>], offset: Float) -> [SIMD2<Float>] {
+        return jawPoints.map { SIMD2<Float>($0.x, $0.y + offset) }
     }
+
+
     
     mutating func applyNeckShadowFilter(image: MTIImage) -> MTIImage {
         let filter = NeckShadowMetalFilter()
@@ -540,26 +548,89 @@ extension FaceTuneFilterModelV2 {
 extension FaceTuneFilterModelV2 {
     mutating func updateEyelashFilterModel() {
         
-        let rightEyeContourIndices: [Int] = [7, 163, 144, 145, 153, 154,133, 158, 159, 160, 161]
-        let righteyelashesIndices: [CGPoint] = self.getSpecificFaceIndices(indices: rightEyeContourIndices)
-        let normalizedPoint = self.getNoramlizePoint(points: righteyelashesIndices)
+        let rightEyeLashesUpIndices = [246,160,161,159,158,157,173]
+        let rightEyeLashesDownIndices = [33,7, 163, 144, 145, 153, 154,155]
+        let leftEyelashesUpIndices = [398, 384, 385, 386, 387, 388, 466]
+        let leftEyelashesDownIndices = [381,380,374,373,390,249,263]
+        
+        
+        let rightEyeLashesupPoint = self.processEyelashesPoints(indices: rightEyeLashesUpIndices,
+                                                                imageSize: self.imageSize,
+                                                                offset: -4)
+        
+        let rightEyeLashesDownPoint = self.processEyelashesPoints(indices: rightEyeLashesDownIndices,
+                                                                imageSize: self.imageSize,
+                                                                offset: 6)
+        
+        let leftEyelashesUpPoint = self.processEyelashesPoints(indices: leftEyelashesUpIndices,
+                                                                imageSize: self.imageSize,
+                                                                offset: -4)
+        
+        let leftEyelashesDownPoint = self.processEyelashesPoints(indices: leftEyelashesDownIndices,
+                                                                imageSize: self.imageSize,
+                                                                offset: 6)
+        
+       /* let rightEyeContourUpIndices: [Int] = [381,380,374,373,390,249,263] //[398, 384, 385, 386, 387, 388, 466]//[33,7, 163, 144, 145, 153, 154,155] //[246,160,161,159,158,157,173] //[33,7, 163, 144, 145, 153, 154,155] //133, 158, 159, 160, 161
+        //let rightEyeDownIndices: [Int] = [33,7,]
+        let righteyelashesUpIndices: [CGPoint] = self.getSpecificFaceIndices(indices: rightEyeContourUpIndices)
+        let normalizedRightEyeUPPoint = self.getNoramlizePoint(points: righteyelashesUpIndices)
+        
+        //[263, 249, 390, 373, 374, 380, 381, 382,362,398, 384, 385, 386, 387, 388, 466]
         
         let texWidth = Float(imageSize.width)
         let texHeight = Float(imageSize.height)
-
-        let simdPoints: [SIMD2<Float>] = normalizedPoint.map {
-            SIMD2(Float($0.x) / texWidth,
-                  Float($0.y) / texHeight)
+        
+        let simdPoints1: [SIMD2<Float>] = normalizedRightEyeUPPoint.map {
+            SIMD2(Float($0.x),
+                  Float($0.y))
         }
         
-        self.eyelashFilterModel.curveFast = simdPoints
+        
+        let points = self.shiftJawPointsDown(jawPoints: simdPoints1,
+                                             offset: 6)
+
+        let simdPoints: [SIMD2<Float>] = points.map {
+            SIMD2(Float($0.x) / texWidth,
+                  Float($0.y) / texHeight)
+        }*/
+        
+        self.eyelashFilterModel.leftEyeUpIndices = leftEyelashesUpPoint
+        self.eyelashFilterModel.leftEyeDownIndices = leftEyelashesDownPoint
+        self.eyelashFilterModel.rightEyeUpIndices = rightEyeLashesupPoint
+        self.eyelashFilterModel.rightEyeDownIndices = rightEyeLashesDownPoint
     }
+    
+    func processEyelashesPoints(indices: [Int],
+                                imageSize: CGSize,
+                                offset: Float = 6) -> [SIMD2<Float>] {
+        let points = self.getSpecificFaceIndices(indices: indices)
+        let normalizedPoints = self.getNoramlizePoint(points: points)
+        
+        let texWidth = Float(imageSize.width)
+        let texHeight = Float(imageSize.height)
+        
+        let simdPoints1: [SIMD2<Float>] = normalizedPoints.map {
+            SIMD2(Float($0.x), Float($0.y))
+        }
+        
+        let shiftedPoints = self.shiftJawPointsDown(jawPoints: simdPoints1, offset: offset)
+        
+        let simdPoints: [SIMD2<Float>] = shiftedPoints.map {
+            SIMD2(Float($0.x) / texWidth, Float($0.y) / texHeight)
+        }
+        
+        return simdPoints
+    }
+
     
     mutating func applyEyelashesFilter(image: MTIImage) -> MTIImage {
         let filter = EyelashMetalFilterV2()
         
         filter.scaleFactor = eyelashFilterModel.scaleFactor
-        filter.point = eyelashFilterModel.curveFast
+        filter.rightUpPoints = eyelashFilterModel.rightEyeUpIndices
+        filter.rightDownPoints = eyelashFilterModel.rightEyeDownIndices
+        filter.leftUpPoints = eyelashFilterModel.leftEyeUpIndices
+        filter.leftDownPoints = eyelashFilterModel.leftEyeDownIndices
         filter.inputImage = image
         
         if let outputImage = filter.outputImage {

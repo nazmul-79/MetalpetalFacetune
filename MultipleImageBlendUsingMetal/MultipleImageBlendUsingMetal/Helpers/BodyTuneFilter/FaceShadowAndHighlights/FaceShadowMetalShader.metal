@@ -227,7 +227,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     
     return float4(finalColor, alpha);*/
     
-    /*float2 uv = vert.textureCoordinate;
+    float2 uv = vert.textureCoordinate;
     float4 baseColor = inputTexture.sample(textureSampler, uv);
     float3 base = baseColor.rgb;
     float alpha = baseColor.a;
@@ -239,7 +239,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
 
     // --- Fixed top/bottom extension ---
     const float topScale    = 0.2;
-    const float bottomScale = 0.05;
+    const float bottomScale = 0.1;
     thread float2 extPoints[128];
     for (uint i = 0; i < count; i++)
         extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
@@ -278,7 +278,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     // --- Final smooth blend ---
     float3 finalColor = mix(base, target, finalMask);
 
-    return float4(finalColor, alpha);*/
+    return float4(finalColor, alpha);
     
     /*float2 uv = vert.textureCoordinate;
     float4 baseColor = inputTexture.sample(textureSampler, uv);
@@ -341,7 +341,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
 
     return float4(finalColor, alpha);*/
     
-    /*float2 uv = vert.textureCoordinate;
+   /* float2 uv = vert.textureCoordinate;
     float4 baseColor = inputTexture.sample(textureSampler, uv);
     float3 base = baseColor.rgb;
     float alpha = baseColor.a;
@@ -396,7 +396,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     return float4(finalColor, alpha);*/
 
 
-    float2 uv = vert.textureCoordinate;
+    /*float2 uv = vert.textureCoordinate;
     float4 baseColor = inputTexture.sample(textureSampler, uv);
     float3 base = baseColor.rgb;
     float alpha = baseColor.a;
@@ -451,6 +451,6 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     // --- Final blended color ---
     float3 finalColor = mix(base, highlightResult, finalMask);
 
-    return float4(finalColor, alpha);
+    return float4(finalColor, alpha);*/
 
 }
