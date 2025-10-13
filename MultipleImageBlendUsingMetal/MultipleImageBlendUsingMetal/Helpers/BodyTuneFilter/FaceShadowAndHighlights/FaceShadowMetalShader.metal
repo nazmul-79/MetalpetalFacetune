@@ -528,8 +528,6 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     // --- Polygon mask (full-area with smooth edges) ---
     float dpoly = signedDistancePolygon(uv, extPoints, count);
     float edgeSoftness = 0.03;
-
-    // Smooth full-area mask: 1 inside, 0 outside, smooth transition at edges
     float mask = smoothstep(edgeSoftness, 0.0, dpoly);
     mask = clamp(mask, 0.0, 1.0);
 
@@ -543,16 +541,15 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     float3 adjusted;
 
     if (s >= 0.0) {
-        // Lift shadows - stronger on darker pixels, smooth curve
-        float liftAmount = s * 0.4;
-        float shadowMask = 1.0 - lum;         // darker pixels get more lift
-        shadowMask = smoothstep(0.0, 1.0, pow(shadowMask, 2.2)); // smoother curve
+        // Lift shadows - S-shaped smooth curve
+        float liftAmount = s * 0.25; // max lift strength
+        float shadowMask = 1.0 / (1.0 + exp((lum - 0.25) * 2.0));
+        // Darker pixels -> mask ~1, mid -> ~0.5, bright -> ~0
         adjusted = base + liftAmount * shadowMask;
     } else {
-        // Deepen shadows - subtle darkening, smooth curve
+        // Deepen shadows smoothly
         float darkenAmount = abs(s) * 0.4;
-        float shadowMask = lum;               // lighter pixels get more effect
-        shadowMask = smoothstep(0.0, 1.0, pow(shadowMask, 0.6)); // smoother curve
+        float shadowMask = pow(lum, 0.6); // preserve highlights
         adjusted = base * (1.0 - darkenAmount * shadowMask);
     }
 
@@ -564,6 +561,8 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
 
     // --- Output ---
     return float4(finalColor, alpha);
+
+
 
 
 }
