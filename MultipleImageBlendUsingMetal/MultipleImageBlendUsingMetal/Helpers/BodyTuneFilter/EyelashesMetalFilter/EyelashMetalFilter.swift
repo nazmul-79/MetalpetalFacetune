@@ -17,10 +17,8 @@ class EyelashMetalFilterV2: NSObject, MTIFilter {
 
     // Nose parameters
     var scaleFactor: Float = 0.0
-    var rightUpPoints: [SIMD2<Float>] = []
-    var rightDownPoints: [SIMD2<Float>] = []
-    var leftUpPoints: [SIMD2<Float>] = []
-    var leftDownPoints: [SIMD2<Float>] = []
+    var rightPoints: [SIMD2<Float>] = []
+    var leftPoints: [SIMD2<Float>] = []
     
     //let dataBuffer = MTIDataBuffer(bytes: <#T##UnsafeRawPointer#>, length: <#T##UInt#>)
 
@@ -37,20 +35,17 @@ class EyelashMetalFilterV2: NSObject, MTIFilter {
     var outputImage: MTIImage? {
         guard let inputImage = inputImage else { return nil }
         
-        guard let rUppointBuffer = MTIDataBuffer(bytes: &rightUpPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * rightUpPoints.count)) else {return nil}
+        guard let leftPointsBuffer = MTIDataBuffer(bytes: &leftPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * leftPoints.count)) else {return nil}
         
-        guard let rDownpointBuffer = MTIDataBuffer(bytes: &rightDownPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * rightDownPoints.count)) else {return nil}
+        guard let rightPointBuffer = MTIDataBuffer(bytes: &rightPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * rightPoints.count)) else {return nil}
         
-        guard let lUppointBuffer = MTIDataBuffer(bytes: &leftUpPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * leftUpPoints.count)) else {return nil}
-        
-        guard let lDownpointBuffer = MTIDataBuffer(bytes: &leftDownPoints, length: UInt(MemoryLayout<SIMD2<Float>>.size * leftDownPoints.count)) else {return nil}
 
         let parameters: [String: Any] = [
             "scaleFactor": scaleFactor,
-            "rightUpPoints": rUppointBuffer,
-            "rightDownPoints": rDownpointBuffer,
-            "leftUpPoints": lUppointBuffer,
-            "leftDownPoints": lDownpointBuffer,
+            "rightPoints": rightPointBuffer,
+            "leftPoints": leftPointsBuffer,
+            "rightCount": UInt(rightPoints.count),
+            "leftCount": UInt(leftPoints.count),
         ]
 
         return Self.kernel.apply(to: inputImage, parameters: parameters)

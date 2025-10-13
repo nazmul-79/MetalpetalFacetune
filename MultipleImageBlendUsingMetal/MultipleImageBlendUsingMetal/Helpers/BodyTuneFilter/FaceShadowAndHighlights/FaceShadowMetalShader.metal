@@ -227,7 +227,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     
     return float4(finalColor, alpha);*/
     
-    float2 uv = vert.textureCoordinate;
+   /* float2 uv = vert.textureCoordinate;
     float4 baseColor = inputTexture.sample(textureSampler, uv);
     float3 base = baseColor.rgb;
     float alpha = baseColor.a;
@@ -278,7 +278,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     // --- Final smooth blend ---
     float3 finalColor = mix(base, target, finalMask);
 
-    return float4(finalColor, alpha);
+    return float4(finalColor, alpha);*/
     
     /*float2 uv = vert.textureCoordinate;
     float4 baseColor = inputTexture.sample(textureSampler, uv);
@@ -452,5 +452,118 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     float3 finalColor = mix(base, highlightResult, finalMask);
 
     return float4(finalColor, alpha);*/
+    
+    /*float2 uv = vert.textureCoordinate;
+    float4 baseColor = inputTexture.sample(textureSampler, uv);
+    float3 base = baseColor.rgb;
+    float alpha = baseColor.a;
+
+    // --- Compute centroid ---
+    float2 centroid = float2(0.0);
+    for (uint i = 0; i < count; i++) centroid += points[i];
+    centroid /= float(count);
+
+    // --- Extended polygon region ---
+    const float topScale    = 0.2;
+    const float bottomScale = 0.1;
+    thread float2 extPoints[128];
+    for (uint i = 0; i < count; i++)
+        extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
+
+    // --- Polygon mask (full-area with smooth edges) ---
+    float dpoly = signedDistancePolygon(uv, extPoints, count);
+    float edgeSoftness = 0.03;
+    float mask = smoothstep(-edgeSoftness, 0.0, -dpoly);
+    mask = clamp(mask, 0.0, 1.0);
+
+    // --- Normalize control factor (-100..100 → -1..1) ---
+    float s = clamp(faceScaleFactor / 400.0, -1.0, 1.0);
+
+    // --- Compute luminance ---
+    float lum = dot(base, float3(0.299, 0.587, 0.114));
+
+    // --- Improved shadow adjustment ---
+    float3 adjusted;
+
+    if (s >= 0.0) {
+        // Lift shadows - only affect dark areas, preserve bright areas
+        float liftAmount = s * 0.4;
+        float shadowMask = 1.0 - lum; // stronger effect on darker pixels
+        shadowMask = pow(shadowMask, 2.0); // smooth curve
+        adjusted = base + (liftAmount * shadowMask);
+    } else {
+        // Deepen shadows - subtle darkening without crushing blacks
+        float darkenAmount = abs(s) * 0.4;
+        float shadowMask = lum; // stronger effect on brighter pixels
+        shadowMask = pow(shadowMask, 0.5); // smooth curve
+        adjusted = base * (1.0 - darkenAmount * shadowMask);
+    }
+
+    // Clamp to prevent overshoot
+    adjusted = clamp(adjusted, 0.0, 1.0);
+
+    // --- Blend using full-area mask ---
+    float3 finalColor = mix(base, adjusted, mask);
+
+    // --- Output ---
+    return float4(finalColor, alpha);*/
+    
+    float2 uv = vert.textureCoordinate;
+    float4 baseColor = inputTexture.sample(textureSampler, uv);
+    float3 base = baseColor.rgb;
+    float alpha = baseColor.a;
+
+    // --- Compute centroid ---
+    float2 centroid = float2(0.0);
+    for (uint i = 0; i < count; i++) centroid += points[i];
+    centroid /= float(count);
+
+    // --- Extended polygon region ---
+    const float topScale    = 0.2;
+    const float bottomScale = 0.1;
+    thread float2 extPoints[128];
+    for (uint i = 0; i < count; i++)
+        extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
+
+    // --- Polygon mask (full-area with smooth edges) ---
+    float dpoly = signedDistancePolygon(uv, extPoints, count);
+    float edgeSoftness = 0.03;
+
+    // Smooth full-area mask: 1 inside, 0 outside, smooth transition at edges
+    float mask = smoothstep(edgeSoftness, 0.0, dpoly);
+    mask = clamp(mask, 0.0, 1.0);
+
+    // --- Normalize control factor (-100..100 → -1..1) ---
+    float s = clamp(faceScaleFactor / 400.0, -1.0, 1.0);
+
+    // --- Compute luminance ---
+    float lum = dot(base, float3(0.299, 0.587, 0.114));
+
+    // --- Smooth shadow adjustment ---
+    float3 adjusted;
+
+    if (s >= 0.0) {
+        // Lift shadows - stronger on darker pixels, smooth curve
+        float liftAmount = s * 0.4;
+        float shadowMask = 1.0 - lum;         // darker pixels get more lift
+        shadowMask = smoothstep(0.0, 1.0, pow(shadowMask, 2.2)); // smoother curve
+        adjusted = base + liftAmount * shadowMask;
+    } else {
+        // Deepen shadows - subtle darkening, smooth curve
+        float darkenAmount = abs(s) * 0.4;
+        float shadowMask = lum;               // lighter pixels get more effect
+        shadowMask = smoothstep(0.0, 1.0, pow(shadowMask, 0.6)); // smoother curve
+        adjusted = base * (1.0 - darkenAmount * shadowMask);
+    }
+
+    // Clamp to avoid overshoot
+    adjusted = clamp(adjusted, 0.0, 1.0);
+
+    // --- Blend using smooth full-area mask ---
+    float3 finalColor = mix(base, adjusted, mask);
+
+    // --- Output ---
+    return float4(finalColor, alpha);
+
 
 }

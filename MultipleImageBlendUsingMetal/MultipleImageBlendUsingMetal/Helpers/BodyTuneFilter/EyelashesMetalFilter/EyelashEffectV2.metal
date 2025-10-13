@@ -503,42 +503,260 @@ float computeShadowMask(float2 uv,
     return mask;
 }
 
+float sdSegment(float2 p, float2 a, float2 b) {
+    float2 pa = p - a;
+    float2 ba = b - a;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    return length(pa - ba * h);
+}
+
+// --- Point-in-polygon test (ray casting) ---
+inline bool pointInPolygon1(float2 p, device const float2 *poly, uint count) {
+    bool inside = false;
+    for (uint i = 0, j = count - 1; i < count; j = i++) {
+        float2 pi = poly[i];
+        float2 pj = poly[j];
+        bool intersect = ((pi.y > p.y) != (pj.y > p.y)) &&
+                         (p.x < (pj.x - pi.x) * (p.y - pi.y) / (pj.y - pi.y + 1e-6) + pi.x);
+        inside = inside != intersect;
+    }
+    return inside;
+}
+
+
 // --- Eyelash Shader ---
 fragment float4 eyelashShader(VertexOut vert [[stage_in]],
                               texture2d<float> inputTexture [[texture(0)]],
                               constant float &scaleFactor [[buffer(0)]],
-                              device const float2 *rightUpPoints [[buffer(1)]],
-                              device const float2 *rightDownPoints [[buffer(2)]],
-                              device const float2 *leftUpPoints [[buffer(3)]],
-                              device const float2 *leftDownPoints [[buffer(4)]])
+                              device const float2 *rightPoints [[buffer(1)]],
+                              device const float2 *leftPoints [[buffer(2)]],
+                              constant uint  &rightCount [[buffer(3)]],
+                              constant uint  &leftCount [[buffer(4)]])
 {
-    constexpr sampler textureSampler(mag_filter::linear, min_filter::linear);
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
+       float2 uv = vert.textureCoordinate;
+       float4 color = inputTexture.sample(s, uv);
+       float3 base = color.rgb;
+
+       // --- Adaptive line thickness ---
+       float lineWidth = 0.0015 * mix(0.5, 2.0, clamp(scaleFactor / 100.0, 0.0, 1.0));
+       float feather   = lineWidth * 0.8; // smooth edge
+       float minDist   = 1e5;
+
+       // --- Right polygon border distance ---
+       for (uint i = 0; i < rightCount; i++) {
+           float2 a = rightPoints[i];
+           float2 b = rightPoints[(i + 1) % rightCount];
+           float d = sdSegment(uv, a, b);
+           minDist = min(minDist, d);
+       }
+
+       // --- Left polygon border distance ---
+       for (uint i = 0; i < leftCount; i++) {
+           float2 a = leftPoints[i];
+           float2 b = leftPoints[(i + 1) % leftCount];
+           float d = sdSegment(uv, a, b);
+           minDist = min(minDist, d);
+       }
+
+       // --- Draw smooth border ---
+       float borderMask = 1.0 - smoothstep(lineWidth - feather, lineWidth + feather, minDist);
+
+       // --- Color and blend ---
+       float3 borderColor = float3(0.05, 0.05, 0.05); // eyelash dark line
+       float borderOpacity = clamp(scaleFactor / 100.0, 0.0, 1.0);
+       float3 finalColor = mix(base, borderColor, borderMask * borderOpacity);
+
+       return float4(finalColor, color.a);*/
+    
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
+       float2 uv = vert.textureCoordinate;
+       float4 color = inputTexture.sample(s, uv);
+       float3 base = color.rgb;
+
+       // --- Find min distance to both eyelash polygons ---
+       float minDist = 1e5;
+       for (uint i = 0; i < rightCount; i++) {
+           float2 a = rightPoints[i];
+           float2 b = rightPoints[(i + 1) % rightCount];
+           minDist = min(minDist, sdSegment(uv, a, b));
+       }
+       for (uint i = 0; i < leftCount; i++) {
+           float2 a = leftPoints[i];
+           float2 b = leftPoints[(i + 1) % leftCount];
+           minDist = min(minDist, sdSegment(uv, a, b));
+       }
+
+       // --- Determine if inside any polygon ---
+       bool insideLeft  = pointInPolygon(uv, leftPoints, leftCount);
+       bool insideRight = pointInPolygon(uv, rightPoints, rightCount);
+       bool inside = insideLeft || insideRight;
+
+       // --- Border region = within lineWidth but not deep inside ---
+       float lineWidth = 0.002 * mix(0.6, 2.0, clamp(scaleFactor / 100.0, 0.0, 1.0));
+       float feather = lineWidth * 1.5;
+
+       // Outside smooth fade
+       float borderFalloff = 1.0 - smoothstep(lineWidth - feather, lineWidth + feather, abs(minDist));
+
+       // Mask: only near border (thin outline)
+       float borderMask = borderFalloff * (inside ? 1.0 : 0.0);
+
+       // --- Skip weak pixels ---
+       float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+       if (factor < 0.01 || borderMask < 0.001)
+           return color;
+
+       // --- Adaptive blur for clarity ---
+       float2 texel = 1.0 / float2(inputTexture.get_width(), inputTexture.get_height());
+       float imageSize = min(inputTexture.get_width(), inputTexture.get_height());
+       float kernelScale = (imageSize < 500.0) ? 0.5 : (imageSize < 800.0 ? 0.7 : 1.2);
+
+       float3 blur = float3(0.0);
+       constexpr float kernelWeights[9] = {1,2,1,2,4,2,1,2,1};
+       int sampleIndex = 0;
+       for (int y = -1; y <= 1; y++) {
+           for (int x = -1; x <= 1; x++) {
+               float2 offset = float2(x, y) * texel * kernelScale;
+               blur += inputTexture.sample(s, uv + offset).rgb * kernelWeights[sampleIndex];
+               sampleIndex++;
+           }
+       }
+       blur /= 16.0;
+
+       float3 highpass = base - blur;
+       float sharpness = length(highpass);
+       float clarityStrength = mix(1.0, 3.5, factor);
+       float softener = smoothstep(0.01, 0.15, sharpness);
+       float localVariance = dot(highpass, highpass);
+       float adaptiveStrength = mix(clarityStrength, clarityStrength * 1.8,
+                                   smoothstep(0.0, 0.01, localVariance));
+
+       float3 sharpened = base + highpass * adaptiveStrength * (1.0 - softener);
+       sharpened = pow(clamp(sharpened, 0.0, 1.0), float3(0.95));
+
+       // --- Apply only along border ---
+       float blendStrength = borderMask * factor;
+       float3 finalColor = mix(base, sharpened, blendStrength);
+
+       return float4(finalColor, color.a);*/
+    
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
     float2 uv = vert.textureCoordinate;
-    float4 baseColor = inputTexture.sample(textureSampler, uv);
-    float3 color = baseColor.rgb;
-    float alpha = baseColor.a;
+    float4 color = inputTexture.sample(s, uv);
+    float3 base = color.rgb;
 
-    if (alpha < 0.01) return baseColor;
-
-    // --- Compute shadow mask for all 4 sets ---
-    float maskRightUp   = computeShadowMask(uv, rightUpPoints, 7, scaleFactor);
-    float maskRightDown = computeShadowMask(uv, rightDownPoints, 8, scaleFactor);
-    float maskLeftUp    = computeShadowMask(uv, leftUpPoints, 7, scaleFactor);
-    float maskLeftDown  = computeShadowMask(uv, leftDownPoints, 7, scaleFactor);
-
-    float shadowMask = max(max(maskRightUp, maskRightDown), max(maskLeftUp, maskLeftDown));
-
-    // --- Apply shadow color ---
-    float3 shadowColor = color * 0.7; // darken existing color
-    color = mix(color, shadowColor, shadowMask * 0.8);
-
-    // --- Optional subtle color tint for shadow ---
-    if (shadowMask > 0.01) {
-        float3 coolShadow = color * float3(0.9, 0.95, 1.0);
-        color = mix(color, coolShadow, shadowMask * 0.3);
+    // --- Distance to both polygons ---
+    float minDist = 1e5;
+    for (uint i = 0; i < rightCount; i++) {
+        float2 a = rightPoints[i];
+        float2 b = rightPoints[(i + 1) % rightCount];
+        minDist = min(minDist, sdSegment(uv, a, b));
+    }
+    for (uint i = 0; i < leftCount; i++) {
+        float2 a = leftPoints[i];
+        float2 b = leftPoints[(i + 1) % leftCount];
+        minDist = min(minDist, sdSegment(uv, a, b));
     }
 
-    return float4(color, alpha);
+    // --- Point-in-polygon ---
+    bool insideLeft  = pointInPolygon(uv, leftPoints, leftCount);
+    bool insideRight = pointInPolygon(uv, rightPoints, rightCount);
+    bool inside = insideLeft || insideRight;
+
+    // --- Border mask only **outside** polygon ---
+    float lineWidth = 2.0 / min(inputTexture.get_width(), inputTexture.get_height()); // 2-pixel radius
+    float feather   = lineWidth * 1.5;
+
+    // Only outside: distance > 0 AND close enough to edge
+    float borderMask = (!inside) ? smoothstep(lineWidth + feather, lineWidth, minDist) : 0.0;
+
+    // --- Skip if too weak ---
+    float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+    if (factor < 0.01 || borderMask < 0.001)
+        return color;
+
+    // --- Simple highpass / clarity for border ---
+    float2 texel = 1.0 / float2(inputTexture.get_width(), inputTexture.get_height());
+    float3 blur = ((inputTexture.sample(s, uv + texel).rgb) + (inputTexture.sample(s, uv - texel).rgb)) * 0.5;
+    float3 highpass = base - blur;
+
+    // Apply clarity along border
+    float3 sharpened = base + highpass * factor * borderMask;
+
+    // Optional: slight saturation boost along border
+    float intensity = dot(sharpened, float3(0.299, 0.587, 0.114));
+    sharpened = mix(float3(intensity), sharpened, 1.0 + 0.25 * borderMask);
+
+    // --- Clamp ---
+    float3 finalColor = clamp(sharpened, 0.0, 1.0);
+
+    return float4(finalColor, color.a);*/
+    
+    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = vert.textureCoordinate;
+    float4 color = inputTexture.sample(s, uv);
+    float3 base = color.rgb;
+
+    // --- Distance to polygons ---
+    float minDist = 1e5;
+    for (uint i = 0; i < rightCount; i++) {
+        float2 a = rightPoints[i];
+        float2 b = rightPoints[(i + 1) % rightCount];
+        minDist = min(minDist, sdSegment(uv, a, b));
+    }
+    for (uint i = 0; i < leftCount; i++) {
+        float2 a = leftPoints[i];
+        float2 b = leftPoints[(i + 1) % leftCount];
+        minDist = min(minDist, sdSegment(uv, a, b));
+    }
+
+    // --- Inside polygon check ---
+    bool insideLeft  = pointInPolygon(uv, leftPoints, leftCount);
+    bool insideRight = pointInPolygon(uv, rightPoints, rightCount);
+    bool inside = insideLeft || insideRight;
+
+    // --- Border mask only outside polygon ---
+    float lineWidth = 2.0 / min(inputTexture.get_width(), inputTexture.get_height());
+    float feather = lineWidth * 1.5;
+    float borderMask = (!inside) ? smoothstep(lineWidth + feather, lineWidth, minDist) : 0.0;
+
+    float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+    factor = pow(factor, 0.85);
+    if (factor < 0.01 || borderMask < 0.001)
+        return color;
+
+    // --- 3x3 blur for highpass ---
+    float2 texel = 1.0 / float2(inputTexture.get_width(), inputTexture.get_height());
+    float3 blur = float3(0.0);
+    constexpr float kernelWeights[9] = {1,2,1,2,4,2,1,2,1};
+    int sampleIndex = 0;
+    for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+            float2 offset = float2(x, y) * texel;
+            blur += inputTexture.sample(s, uv + offset).rgb * kernelWeights[sampleIndex];
+            sampleIndex++;
+        }
+    }
+    blur /= 16.0;
+
+    // --- Highpass / adaptive clarity ---
+    float3 highpass = base - blur;
+    float sharpness = length(highpass);
+    float clarityStrength = mix(1.0, 3.5, factor);
+    float softener = smoothstep(0.01, 0.15, sharpness);
+    float localVariance = dot(highpass, highpass);
+    float adaptiveStrength = mix(clarityStrength, clarityStrength * 1.8,
+                                 smoothstep(0.0, 0.01, localVariance));
+
+    float3 sharpened = base + highpass * adaptiveStrength * (1.0 - softener);
+    sharpened = pow(clamp(sharpened, 0.0, 1.0), float3(0.95));
+
+    // --- Blend only along border ---
+    float3 finalColor = mix(base, sharpened, borderMask);
+
+    return float4(finalColor, color.a);
+
 }
 
 
@@ -724,3 +942,47 @@ fragment float4 eyelashShader(VertexOut vert [[stage_in]],
     return color;
 }
 */
+
+/*
+ 
+ 
+ 
+ constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = vert.textureCoordinate;
+    float4 color = inputTexture.sample(s, uv);
+    float3 base = color.rgb;
+
+    // --- Adaptive line thickness ---
+    float lineWidth = 0.0015 * mix(0.5, 2.0, clamp(scaleFactor / 100.0, 0.0, 1.0));
+    float feather   = lineWidth * 0.8; // smooth edge
+    float minDist   = 1e5;
+
+    // --- Right polygon border distance ---
+    for (uint i = 0; i < rightCount; i++) {
+        float2 a = rightPoints[i];
+        float2 b = rightPoints[(i + 1) % rightCount];
+        float d = sdSegment(uv, a, b);
+        minDist = min(minDist, d);
+    }
+
+    // --- Left polygon border distance ---
+    for (uint i = 0; i < leftCount; i++) {
+        float2 a = leftPoints[i];
+        float2 b = leftPoints[(i + 1) % leftCount];
+        float d = sdSegment(uv, a, b);
+        minDist = min(minDist, d);
+    }
+
+    // --- Draw smooth border ---
+    float borderMask = 1.0 - smoothstep(lineWidth - feather, lineWidth + feather, minDist);
+
+    // --- Color and blend ---
+    float3 borderColor = float3(0.05, 0.05, 0.05); // eyelash dark line
+    float borderOpacity = clamp(scaleFactor / 100.0, 0.0, 1.0);
+    float3 finalColor = mix(base, borderColor, borderMask * borderOpacity);
+
+    return float4(finalColor, color.a);
+ 
+ 
+ 
+ */

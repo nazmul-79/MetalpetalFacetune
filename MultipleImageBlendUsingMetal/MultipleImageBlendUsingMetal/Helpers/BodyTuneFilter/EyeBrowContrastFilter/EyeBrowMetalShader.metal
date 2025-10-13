@@ -199,7 +199,7 @@ fragment float4 eyeBrowBrighterShader(VertexOut in [[stage_in]],
 
     return float4(finalColor, alpha);*/
     
-    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
     float2 uv = in.textureCoordinate;
 
     float4 texColor = tex.sample(s, uv);
@@ -225,13 +225,55 @@ fragment float4 eyeBrowBrighterShader(VertexOut in [[stage_in]],
 
     // --- Pixel-wise contrast scaling ---
     float effect = mask; // mask only for edges
-    float contrastScale = 1.0 + 0.3 * factor * effect; // adjust 0.25 for intensity
+    float contrastScale = 1.0 + 0.35 * factor * effect; // adjust 0.25 for intensity
 
     // Contrast around mid-gray (0.5)
     float3 contrastedColor = (base - 0.5) * contrastScale + 0.5;
     contrastedColor = clamp(contrastedColor, 0.0, 1.0);
 
-    return float4(contrastedColor, alpha);
+    return float4(contrastedColor, alpha);*/
+    
+    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = in.textureCoordinate;
 
+    float4 texColor = tex.sample(s, uv);
+    float alpha = texColor.a;
+    if (alpha < 0.01) return texColor;
 
+    float3 base = texColor.rgb;
+
+    // --- Distance fields to left/right brow polygons ---
+    float dLeft  = signedDistancePolygon(uv, leftbrowPoints, leftbrowCount);
+    float dRight = signedDistancePolygon(uv, rightbrowPoints, rightbrowCount);
+
+    // --- Feather / mask ---
+    float feather = 0.015;
+    float maskLeft  = 1.0 - smoothstep(-feather, feather, dLeft);
+    float maskRight = 1.0 - smoothstep(-feather, feather, dRight);
+    float mask = max(maskLeft, maskRight);
+    mask = pow(mask, 1.15); // slight soft edge
+
+    // --- Slider factor (0–100 normalized) ---
+    float factor = clamp(scaleFactor / 100.0, -1.0, 1.0);
+    if (abs(factor) < 0.001) return texColor;
+
+    // --- Adaptive soft contrast (preserves detail) ---
+    float3 mid = float3(0.5);
+    float3 diff = base - mid;
+    float softCurve = 1.0 + (0.25 * factor * mask); // gentle power
+    float3 contrasted = mid + diff * softCurve;
+
+    // --- Add micro-vibrance for richness ---
+    float maxRGB = max(max(base.r, base.g), base.b);
+    float minRGB = min(min(base.r, base.g), base.b);
+    float saturation = maxRGB - minRGB;
+    float vibranceBoost = (1.0 - saturation) * 0.3 * abs(factor);
+    float3 gray = (base.r + base.g + base.b) / 3.0;
+    float3 vibranced = contrasted + (contrasted - gray) * vibranceBoost;
+
+    // --- Blend based on mask ---
+    float3 finalColor = mix(base, vibranced, mask);
+    finalColor = clamp(finalColor, 0.0, 1.0);
+
+    return float4(finalColor, alpha);
 }

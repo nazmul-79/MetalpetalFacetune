@@ -1291,7 +1291,7 @@ fragment float4 lipsEffectShader(VertexOut in [[stage_in]],
 
     return float4(finalColor, alpha);*/
     
-    float4 texColor = tex.sample(s, uv);
+    /*float4 texColor = tex.sample(s, uv);
     float alpha = texColor.a;
     float3 base = texColor.rgb;
 
@@ -1335,10 +1335,162 @@ fragment float4 lipsEffectShader(VertexOut in [[stage_in]],
     // --- Final blend with linear interpolation ---
     float3 finalColor = mix(base, deepColor, effect);
 
-    return float4(finalColor, alpha);
-
-
+    return float4(finalColor, alpha);*/
     
+    /*float4 texColor = tex.sample(s, uv);
+    float alpha = texColor.a;
+    float3 base = texColor.rgb;
+
+    if (alpha < 0.01) return texColor;
+
+    // --- Distance masks for lip area ---
+    float dOuter = signedDistancePolygon(uv, outerPoints, outerCount);
+    float dInner = signedDistancePolygon(uv, innerPoints, innerCount);
+
+    // Feather for smooth edges
+    float minFeather = 0.003;
+    float verticalFactor = 1.0 - abs(uv.y - 0.5) * 2.0;
+    float feather = max(0.012 * verticalFactor, minFeather);
+
+    float outerMask = 1.0 - smoothstep(-feather, feather, dOuter);
+    float innerMask = 1.0 - smoothstep(-feather, feather, dInner);
+    float mask = max(outerMask - innerMask, 0.0);
+    mask = pow(mask, 0.85); // smooth edges
+
+    // --- Scale factor normalized 0–100 ---
+    float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+    if (factor < 0.001) return texColor;
+
+    // --- Compute per-pixel saturation ---
+    float3 maxRGB = max(max(base.r, base.g), base.b);
+    float3 minRGB = min(min(base.r, base.g), base.b);
+    float3 saturation = (maxRGB - minRGB);
+
+    // --- Calculate proportional boost for low-saturation pixels ---
+    float3 satBoost = (1.0 - saturation) * 0.4 * factor; // adjust 0.4 for strength
+
+    // --- Apply proportional saturation boost ---
+    float3 enhanced = base + (base - float3((base.r + base.g + base.b)/3.0)) * satBoost;
+
+    // Clamp enhanced color
+    enhanced = clamp(enhanced, 0.0, 1.0);
+
+    // --- Final blend with feathered mask ---
+    float3 finalColor = mix(base, enhanced, mask);
+
+    return float4(finalColor, alpha);*/
+    
+    /*float4 texColor = tex.sample(s, uv);
+    float alpha = texColor.a;
+    float3 base = texColor.rgb;
+
+    if (alpha < 0.01) return texColor;
+
+    // --- Distance masks for lip area ---
+    float dOuter = signedDistancePolygon(uv, outerPoints, outerCount);
+    float dInner = signedDistancePolygon(uv, innerPoints, innerCount);
+
+    // Feather for smooth edges
+    float minFeather = 0.003;
+    float verticalFactor = 1.0 - abs(uv.y - 0.5) * 2.0;
+    float feather = max(0.012 * verticalFactor, minFeather);
+
+    float outerMask = 1.0 - smoothstep(-feather, feather, dOuter);
+    float innerMask = 1.0 - smoothstep(-feather, feather, dInner);
+    float mask = max(outerMask - innerMask, 0.0);
+    mask = pow(mask, 0.85); // smooth edges
+
+    // --- Scale factor normalized 0–100 ---
+    float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+    if (factor < 0.001) return texColor;
+
+    // --- Vibrance enhancement ---
+    float3 maxRGB = max(max(base.r, base.g), base.b);
+    float3 minRGB = min(min(base.r, base.g), base.b);
+    float3 saturation = maxRGB - minRGB;
+
+    float3 satBoost = (1.0 - saturation) * 0.4 * factor; // proportional to low saturation
+    float3 enhanced = base + (base - float3((base.r + base.g + base.b)/3.0)) * satBoost;
+    enhanced = clamp(enhanced, 0.0, 1.0);
+
+    // --- Subtle Gaussian blur 3x3 to smooth vibrance ---
+    float2 texel = 1.0 / float2(tex.get_width(), tex.get_height());
+    float3 blur = float3(0.0);
+    constexpr float kernelWeights[9] = {1,2,1,2,4,2,1,2,1};
+    int sampleIndex = 0;
+    for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+            float2 offset = float2(x, y) * texel;
+            blur += tex.sample(s, uv + offset).rgb * kernelWeights[sampleIndex];
+            sampleIndex++;
+        }
+    }
+    blur /= 16.0;
+
+    // Mix original enhanced color with blurred version for smoothness
+    enhanced = mix(enhanced, blur, 0.3); // adjust 0.3 for blur strength
+
+    // --- Final blend with feathered mask ---
+    float3 finalColor = mix(base, enhanced, mask);
+
+    return float4(finalColor, alpha);*/
+     
+     float4 texColor = tex.sample(s, uv);
+        float alpha = texColor.a;
+        float3 base = texColor.rgb;
+
+        if (alpha < 0.01) return texColor;
+
+        // --- Distance masks for lip area ---
+        float dOuter = signedDistancePolygon(uv, outerPoints, outerCount);
+        float dInner = signedDistancePolygon(uv, innerPoints, innerCount);
+
+        // Feather for smooth edges
+        float minFeather = 0.003;
+        float verticalFactor = 1.0 - abs(uv.y - 0.5) * 2.0;
+        float feather = max(0.012 * verticalFactor, minFeather);
+
+        float outerMask = 1.0 - smoothstep(-feather, feather, dOuter);
+        float innerMask = 1.0 - smoothstep(-feather, feather, dInner);
+        float mask = max(outerMask - innerMask, 0.0);
+        mask = pow(mask, 0.85); // smooth edges
+
+        // --- Scale factor normalized 0–100 ---
+        float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+        if (factor < 0.001) return texColor;
+
+        // --- Vibrance enhancement ---
+        float3 maxRGB = max(max(base.r, base.g), base.b);
+        float3 minRGB = min(min(base.r, base.g), base.b);
+        float3 saturation = maxRGB - minRGB;
+
+        float3 satBoost = (1.0 - saturation) * 0.5 * factor; // proportional to low saturation
+        float3 enhanced = base + (base - float3((base.r + base.g + base.b)/3.0)) * satBoost;
+        enhanced = clamp(enhanced, 0.0, 1.0);
+
+        // --- Subtle Gaussian blur 3x3 to smooth vibrance ---
+        float2 texel = 1.0 / float2(tex.get_width(), tex.get_height());
+        float3 blur = float3(0.0);
+        constexpr float kernelWeights[9] = {1,2,1,2,4,2,1,2,1};
+        int sampleIndex = 0;
+        for (int y = -1; y <= 1; y++) {
+            for (int x = -1; x <= 1; x++) {
+                float2 offset = float2(x, y) * texel;
+                blur += tex.sample(s, uv + offset).rgb * kernelWeights[sampleIndex];
+                sampleIndex++;
+            }
+        }
+        blur /= 16.0;
+
+        // Mix original enhanced color with blurred version for smoothness
+        enhanced = mix(enhanced, blur, 0.5); // adjust 0.3 for blur strength
+
+        // --- Final blend with feathered mask ---
+        float3 finalColor = mix(base, enhanced, mask);
+
+        return float4(finalColor, alpha);
+
+  
 }
 
 

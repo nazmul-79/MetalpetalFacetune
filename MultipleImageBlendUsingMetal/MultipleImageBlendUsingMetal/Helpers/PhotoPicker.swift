@@ -87,11 +87,11 @@ class PhotoPicker: NSObject, PHPickerViewControllerDelegate {
                 DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                     guard let self = self else { return }
                     autoreleasepool {
-                        let downsample = self.downsample(imageData: data, to: 1024)!
+                        let downsample = self.downsample(imageData: data, to: 1500)!
                         DispatchQueue.main.async { [weak self] in
                             self?.delegate?.didSelectPhoto(downsample)
                         }
-                        print("Original image loaded successfully")
+                        print("Original image loaded successfully",downsample.size)
                     }
                 }
             } else {

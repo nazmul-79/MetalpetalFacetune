@@ -28,6 +28,7 @@ enum FaceParsingIndex {
    // static let leftEyeBrow: [Int] = [336,285,296,295,334,282,293,283,301,300]
     static let rightEyeBrow: [Int] = [70,63,105,66,107,55,65,52,53,46]
     static let leftEyeBrow: [Int] = [336,296,334,293,300,276,283,282,295,285]
+   
     static let  outerLipsPoints: [Int] = [
         61, 146, 91, 181, 84, 17,
         314, 405, 321, 375, 291,
@@ -433,15 +434,36 @@ extension FaceTuneFilterModelV2 {
 
 extension FaceTuneFilterModelV2 {
     mutating func updateEyeContrast() {
-        let leftEyeContourIndices: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.leftEyeContourIndices)
-        let rightEyeContourIndices: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.rightEyeContourIndices)
+        
+        let rightEyeLashesUpIndices = [246,160,161,159,158,157]
+        let rightEyeLashesDownIndices = [154,153,145,163,7]//[33,7, 163, 144, 145, 153, 154,155]
+        let leftEyelashesUpIndices = [398, 384, 385, 386, 387, 388, 466]
+        let leftEyelashesDownIndices = [249,390,373,374,380,381]//[381,380,374,373,390,249,263]
+        
+        
+        
+        let rightEyeLashesupPoint = self.processEyelashesPoints(indices: rightEyeLashesUpIndices,
+                                                                imageSize: self.imageSize,
+                                                                offset: 2)
+        
+        let rightEyeLashesDownPoint = self.processEyelashesPoints(indices: rightEyeLashesDownIndices,
+                                                                imageSize: self.imageSize,
+                                                                offset: -2)
+        
+        let leftEyelashesUpPoint = self.processEyelashesPoints(indices: leftEyelashesUpIndices,
+                                                                imageSize: self.imageSize,
+                                                                offset: 2)
+        
+        let leftEyelashesDownPoint = self.processEyelashesPoints(indices: leftEyelashesDownIndices,
+                                                                imageSize: self.imageSize,
+                                                                offset: -2)
         
         let leftEyeIrisIndices: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.leftIrisIndices)
         let rightEyeIrisIndices: [CGPoint] = self.getSpecificFaceIndices(indices: FaceParsingIndex.rightIrisIndices)
         
         
-        let leftEyeContourPoints: [CGPoint] = self.getNoramlizePoint(points: leftEyeContourIndices)
-        let rightEyeContourPoints: [CGPoint] = self.getNoramlizePoint(points: rightEyeContourIndices)
+       // let leftEyeContourPoints: [CGPoint] = self.getNoramlizePoint(points: leftEyeContourIndices)
+        //let rightEyeContourPoints: [CGPoint] = self.getNoramlizePoint(points: rightEyeContourIndices)
         
         let leftEyeIrisPoint: [CGPoint] = self.getNoramlizePoint(points: leftEyeIrisIndices)
         let rightEyeIrisPoints: [CGPoint] = self.getNoramlizePoint(points: rightEyeIrisIndices)
@@ -453,15 +475,6 @@ extension FaceTuneFilterModelV2 {
         let texWidth = Float(imageSize.width)
         let texHeight = Float(imageSize.height)
 
-        let leftContourPointsNormalized: [SIMD2<Float>] = leftEyeContourPoints.map {
-            SIMD2(Float($0.x) / texWidth,
-                  Float($0.y) / texHeight)
-        }
-        
-        let rightContourPointsNormalized: [SIMD2<Float>] = rightEyeContourPoints.map {
-            SIMD2(Float($0.x) / texWidth,
-                  Float($0.y) / texHeight)
-        }
         
         let leftIrisPointsNormalized: [SIMD2<Float>] = leftEyeIrisPoint.map {
             SIMD2(Float($0.x) / texWidth,
@@ -473,15 +486,53 @@ extension FaceTuneFilterModelV2 {
                   Float($0.y) / texHeight)
         }
         
+        let rightEyePoint1 = rightEyeLashesupPoint + rightEyeLashesDownPoint
+        // --- Compute centroid ---
+        let centroid = rightEyePoint1.reduce(SIMD2<Float>(0,0), +) / Float(rightEyePoint1.count)
+
+        // --- Sort points clockwise ---
+        let sortedRightEye = rightEyePoint1.sorted { a, b in
+            let angleA = atan2(a.y - centroid.y, a.x - centroid.x)
+            let angleB = atan2(b.y - centroid.y, b.x - centroid.x)
+            return angleA < angleB
+        }
+
+        // --- Close polygon by repeating first point ---
+        let hullPoints = sortPointsClockwise(rightEyePoint1)
+        let rightEyeContour = sortedRightEye + [sortedRightEye[0]]
+        
+        let sortedByY = rightEyePoint1.sorted { $0.y < $1.y }
+        
         eyeBrightnessFilterModel.scaleFactor = 0
-        eyeBrightnessFilterModel.leftEyePoints = leftContourPointsNormalized
+        eyeBrightnessFilterModel.leftEyePoints = leftEyelashesUpPoint + leftEyelashesDownPoint
         eyeBrightnessFilterModel.leftIrisPoints = leftIrisPointsNormalized
-        eyeBrightnessFilterModel.rightEyePoints = rightContourPointsNormalized
+        eyeBrightnessFilterModel.rightEyePoints = rightEyePoint1 //rightEyeLashesupPoint + rightEyeLashesDownPoint
         eyeBrightnessFilterModel.rightIrisPoints = rightIrisPointsNormalized
         
-        debugPrint("Left and right Points", leftIrisPointsNormalized, rightIrisPointsNormalized)
+        debugPrint("Left and right Points",  hullPoints,  eyeBrightnessFilterModel.leftEyePoints)
         
     }
+    
+    func sortPointsClockwise(_ points: [SIMD2<Float>]) -> [SIMD2<Float>] {
+        guard points.count > 2 else { return points }
+        
+        // Calculate centroid
+        var centroid = SIMD2<Float>(0, 0)
+        for point in points {
+            centroid += point
+        }
+        centroid /= Float(points.count)
+        
+        // Sort points by angle around centroid
+        return points.sorted { pointA, pointB in
+            let angleA = atan2(pointA.y - centroid.y, pointA.x - centroid.x)
+            let angleB = atan2(pointB.y - centroid.y, pointB.x - centroid.x)
+            return angleA < angleB
+        }
+    }
+
+    // Use convex hull for better polygon formation
+  
     
     mutating func applyEyeBrightnessFilter(image: MTIImage) -> MTIImage {
         let filter = EyeConstrastMetalFilterV2()
@@ -548,27 +599,34 @@ extension FaceTuneFilterModelV2 {
 extension FaceTuneFilterModelV2 {
     mutating func updateEyelashFilterModel() {
         
-        let rightEyeLashesUpIndices = [246,160,161,159,158,157,173]
+        /*let rightEyeLashesUpIndices = [246,160,161,159,158,157,173]
         let rightEyeLashesDownIndices = [33,7, 163, 144, 145, 153, 154,155]
         let leftEyelashesUpIndices = [398, 384, 385, 386, 387, 388, 466]
-        let leftEyelashesDownIndices = [381,380,374,373,390,249,263]
+        let leftEyelashesDownIndices = [381,380,374,373,390,249,263]*/
+        
+        let rightEyeLashesUpIndices = [246,160,161,159,158,157,173]
+        let rightEyeLashesDownIndices = [154,153,145,163,7,33]//[33,7, 163, 144, 145, 153, 154,155]
+        let leftEyelashesUpIndices = [398, 384, 385, 386, 387, 388, 466]
+        let leftEyelashesDownIndices = [249,390,373,374,380,381]//[381,380,374,373,390,249,263]
+        
         
         
         let rightEyeLashesupPoint = self.processEyelashesPoints(indices: rightEyeLashesUpIndices,
                                                                 imageSize: self.imageSize,
-                                                                offset: -4)
+                                                                offset: -2)
         
         let rightEyeLashesDownPoint = self.processEyelashesPoints(indices: rightEyeLashesDownIndices,
                                                                 imageSize: self.imageSize,
-                                                                offset: 6)
+                                                                offset: 4)
         
         let leftEyelashesUpPoint = self.processEyelashesPoints(indices: leftEyelashesUpIndices,
                                                                 imageSize: self.imageSize,
-                                                                offset: -4)
+                                                                offset: -2)
         
         let leftEyelashesDownPoint = self.processEyelashesPoints(indices: leftEyelashesDownIndices,
                                                                 imageSize: self.imageSize,
-                                                                offset: 6)
+                                                                offset: 2)
+        
         
        /* let rightEyeContourUpIndices: [Int] = [381,380,374,373,390,249,263] //[398, 384, 385, 386, 387, 388, 466]//[33,7, 163, 144, 145, 153, 154,155] //[246,160,161,159,158,157,173] //[33,7, 163, 144, 145, 153, 154,155] //133, 158, 159, 160, 161
         //let rightEyeDownIndices: [Int] = [33,7,]
@@ -594,15 +652,14 @@ extension FaceTuneFilterModelV2 {
                   Float($0.y) / texHeight)
         }*/
         
-        self.eyelashFilterModel.leftEyeUpIndices = leftEyelashesUpPoint
-        self.eyelashFilterModel.leftEyeDownIndices = leftEyelashesDownPoint
-        self.eyelashFilterModel.rightEyeUpIndices = rightEyeLashesupPoint
-        self.eyelashFilterModel.rightEyeDownIndices = rightEyeLashesDownPoint
+        self.eyelashFilterModel.leftEyeUpIndices = leftEyelashesUpPoint + leftEyelashesDownPoint
+        self.eyelashFilterModel.rightEyeUpIndices = rightEyeLashesupPoint + rightEyeLashesDownPoint
     }
     
     func processEyelashesPoints(indices: [Int],
                                 imageSize: CGSize,
                                 offset: Float = 6) -> [SIMD2<Float>] {
+        
         let points = self.getSpecificFaceIndices(indices: indices)
         let normalizedPoints = self.getNoramlizePoint(points: points)
         
@@ -627,10 +684,8 @@ extension FaceTuneFilterModelV2 {
         let filter = EyelashMetalFilterV2()
         
         filter.scaleFactor = eyelashFilterModel.scaleFactor
-        filter.rightUpPoints = eyelashFilterModel.rightEyeUpIndices
-        filter.rightDownPoints = eyelashFilterModel.rightEyeDownIndices
-        filter.leftUpPoints = eyelashFilterModel.leftEyeUpIndices
-        filter.leftDownPoints = eyelashFilterModel.leftEyeDownIndices
+        filter.rightPoints = eyelashFilterModel.rightEyeUpIndices
+        filter.leftPoints = eyelashFilterModel.leftEyeUpIndices
         filter.inputImage = image
         
         if let outputImage = filter.outputImage {
