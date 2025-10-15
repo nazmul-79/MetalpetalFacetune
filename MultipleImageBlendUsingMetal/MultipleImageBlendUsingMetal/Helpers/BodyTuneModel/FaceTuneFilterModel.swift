@@ -22,6 +22,7 @@ enum FilteryType: String, CaseIterable {
     case teethWhitening = "Teeth Whitening"
     case shadow = "Shadow"
     case neeckShadow = "Neck Shadow"
+    case highlights = "Highlights"
 }
 
 
@@ -101,6 +102,16 @@ struct FaceShadowModel {
     var rotation: Float = 0
     var smoothCurveFast: [SIMD2<Float>] = []
 }
+
+struct FaceHightLightsModel {
+    var faceRect: CGRect = .zero
+    var faceCenter: SIMD2<Float> = .zero
+    var faceRadius: SIMD2<Float> = .zero
+    var scaleFactor: CGFloat = 0
+    var rotation: Float = 0
+    var smoothCurveFast: [SIMD2<Float>] = []
+}
+
 
 struct EyelashFilterModel {
     var scaleFactor: Float = 0

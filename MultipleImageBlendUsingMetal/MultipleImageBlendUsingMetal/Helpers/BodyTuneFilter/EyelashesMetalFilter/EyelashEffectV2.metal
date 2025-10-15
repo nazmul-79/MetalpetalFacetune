@@ -693,7 +693,7 @@ fragment float4 eyelashShader(VertexOut vert [[stage_in]],
 
     return float4(finalColor, color.a);*/
     
-    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
     float2 uv = vert.textureCoordinate;
     float4 color = inputTexture.sample(s, uv);
     float3 base = color.rgb;
@@ -755,7 +755,186 @@ fragment float4 eyelashShader(VertexOut vert [[stage_in]],
     // --- Blend only along border ---
     float3 finalColor = mix(base, sharpened, borderMask);
 
+    return float4(finalColor, color.a);*/
+    
+    /*constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = vert.textureCoordinate;
+    float4 color = inputTexture.sample(s, uv);
+    float3 base = color.rgb;
+
+    // --- Distance to polygons ---
+    float minDist = 1e5;
+    for (uint i = 0; i < rightCount; i++) {
+        float2 a = rightPoints[i];
+        float2 b = rightPoints[(i + 1) % rightCount];
+        minDist = min(minDist, sdSegment(uv, a, b));
+    }
+    for (uint i = 0; i < leftCount; i++) {
+        float2 a = leftPoints[i];
+        float2 b = leftPoints[(i + 1) % leftCount];
+        minDist = min(minDist, sdSegment(uv, a, b));
+    }
+
+    // --- Inside polygon check ---
+    bool insideLeft  = pointInPolygon(uv, leftPoints, leftCount);
+    bool insideRight = pointInPolygon(uv, rightPoints, rightCount);
+    bool inside = insideLeft || insideRight;
+
+    // --- Border mask ---
+    float lineWidth = 2.0 / min(inputTexture.get_width(), inputTexture.get_height());
+    float feather = lineWidth * 1.5;
+    float borderMask = (!inside) ? smoothstep(lineWidth + feather, lineWidth, minDist) : 0.0;
+
+    // --- Slider factor ---
+    float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+    factor = pow(factor, 0.85);
+    if (factor < 0.01 || borderMask < 0.001)
+        return color;
+
+    // --- 3x3 blur ---
+    float2 texel = 1.0 / float2(inputTexture.get_width(), inputTexture.get_height());
+    float3 blur = float3(0.0);
+    constexpr float kernelWeights[9] = {1,2,1,2,4,2,1,2,1};
+    int sampleIndex = 0;
+    for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+            float2 offset = float2(x, y) * texel;
+            blur += inputTexture.sample(s, uv + offset).rgb * kernelWeights[sampleIndex];
+            sampleIndex++;
+        }
+    }
+    blur /= 16.0;
+
+    // --- Pencil-like highpass ---
+    float3 highpass = base - blur;
+    float3 pencilTone = mix(float3(0.0), base, 0.6);
+    float3 sketch = pencilTone - highpass * 0.6 * factor;
+    sketch = pow(clamp(sketch, 0.0, 1.0), float3(0.95));
+
+    // --- Smooth dotted mask ---
+    float noise = fract(sin(dot(uv * 500.0, float2(12.9898,78.233))) * 43758.5453);
+    float dottedMask = borderMask * smoothstep(0.2, 0.8, noise); // smooth random dots
+
+    // --- Directional fade inside polygons ---
+    float directionalFade = 1.0;
+    if (insideLeft) {
+        float minX = leftPoints[0].x;
+        float maxX = leftPoints[0].x;
+        for (uint i = 1; i < leftCount; i++) {
+            minX = min(minX, leftPoints[i].x);
+            maxX = max(maxX, leftPoints[i].x);
+        }
+        float relX = clamp((uv.x - minX) / max(0.0001, maxX - minX), 0.0, 1.0);
+        directionalFade = relX; // left→right fade
+    }
+    if (insideRight) {
+        float minX = rightPoints[0].x;
+        float maxX = rightPoints[0].x;
+        for (uint i = 1; i < rightCount; i++) {
+            minX = min(minX, rightPoints[i].x);
+            maxX = max(maxX, rightPoints[i].x);
+        }
+        float relX = clamp((uv.x - minX) / max(0.0001, maxX - minX), 0.0, 1.0);
+        directionalFade = 1.0 - relX; // right→left fade
+    }
+
+    // --- Final blend ---
+    float3 finalColor = mix(base, base * sketch, dottedMask * directionalFade * factor);
+
+    return float4(finalColor, color.a);*/
+    
+    constexpr sampler s(address::clamp_to_edge, filter::linear);
+    float2 uv = vert.textureCoordinate;
+    float4 color = inputTexture.sample(s, uv);
+    float3 base = color.rgb;
+
+    // --- Distance to polygons ---
+    float minDist = 1e5;
+    for (uint i = 0; i < rightCount; i++) {
+        float2 a = rightPoints[i];
+        float2 b = rightPoints[(i + 1) % rightCount];
+        minDist = min(minDist, sdSegment(uv, a, b));
+    }
+    for (uint i = 0; i < leftCount; i++) {
+        float2 a = leftPoints[i];
+        float2 b = leftPoints[(i + 1) % leftCount];
+        minDist = min(minDist, sdSegment(uv, a, b));
+    }
+
+    // --- Inside polygon check ---
+    bool insideLeft  = pointInPolygon(uv, leftPoints, leftCount);
+    bool insideRight = pointInPolygon(uv, rightPoints, rightCount);
+    bool inside = insideLeft || insideRight;
+
+    // --- Border mask ---
+    float lineWidth = 2.0 / min(inputTexture.get_width(), inputTexture.get_height());
+    float feather = lineWidth * 1.5;
+    float borderMask = (!inside) ? smoothstep(lineWidth + feather, lineWidth, minDist) : 0.0;
+
+    // --- Slider factor ---
+    float factor = clamp(scaleFactor / 100.0, 0.0, 1.0);
+    factor = pow(factor, 0.85);
+    if (factor < 0.01 || borderMask < 0.001)
+        return color;
+
+    // --- 3x3 blur ---
+    float2 texel = 1.0 / float2(inputTexture.get_width(), inputTexture.get_height());
+    float3 blur = float3(0.0);
+    constexpr float kernelWeights[9] = {1,2,1,2,4,2,1,2,1};
+    int sampleIndex = 0;
+    for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+            float2 offset = float2(x, y) * texel;
+            blur += inputTexture.sample(s, uv + offset).rgb * kernelWeights[sampleIndex];
+            sampleIndex++;
+        }
+    }
+    blur /= 16.0;
+
+    // --- Pencil highpass ---
+    float3 highpass = base - blur;
+    float3 pencilTone = mix(float3(0.0), base, 0.6);
+    float3 sketch = pencilTone - highpass * 0.6 * factor;
+    sketch = pow(clamp(sketch, 0.0, 1.0), float3(0.95));
+
+    // --- Dotted mask ---
+    float noise = fract(sin(dot(uv * 500.0, float2(12.9898,78.233))) * 43758.5453);
+    float dottedMask = borderMask * smoothstep(0.2, 0.8, noise);
+
+    // --- Directional fade ---
+    float directionalFade = 1.0;
+
+    // Left polygon: fade left → right
+    if (insideLeft) {
+        float minX = leftPoints[0].x;
+        float maxX = leftPoints[0].x;
+        for (uint i = 1; i < leftCount; i++) {
+            minX = min(minX, leftPoints[i].x);
+            maxX = max(maxX, leftPoints[i].x);
+        }
+        float relX = clamp((uv.x - minX) / max(0.0001, maxX - minX), 0.0, 1.0);
+        directionalFade = 1.0 - relX; // left→right fade out
+    }
+
+    // Right polygon: fade right → left
+    if (insideRight) {
+        float minX = rightPoints[0].x;
+        float maxX = rightPoints[0].x;
+        for (uint i = 1; i < rightCount; i++) {
+            minX = min(minX, rightPoints[i].x);
+            maxX = max(maxX, rightPoints[i].x);
+        }
+        float relX = clamp((uv.x - minX) / max(0.0001, maxX - minX), 0.0, 1.0);
+        directionalFade = relX; // right→left fade out
+    }
+
+    // --- Final blend ---
+    float3 finalColor = mix(base, base * sketch, dottedMask * directionalFade * factor);
+
     return float4(finalColor, color.a);
+
+
+
 
 }
 

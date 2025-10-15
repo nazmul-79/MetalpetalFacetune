@@ -508,7 +508,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     // --- Output ---
     return float4(finalColor, alpha);*/
     
-    float2 uv = vert.textureCoordinate;
+    /*float2 uv = vert.textureCoordinate;
     float4 baseColor = inputTexture.sample(textureSampler, uv);
     float3 base = baseColor.rgb;
     float alpha = baseColor.a;
@@ -519,9 +519,9 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     centroid /= float(count);
 
     // --- Extended polygon region ---
-    const float topScale    = 0.2;
-    const float bottomScale = 0.1;
-    thread float2 extPoints[128];
+    const float topScale    = 0.25;
+    const float bottomScale = 0.2;
+    float2 extPoints[64];
     for (uint i = 0; i < count; i++)
         extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
 
@@ -542,13 +542,13 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
 
     if (s >= 0.0) {
         // Lift shadows - S-shaped smooth curve
-        float liftAmount = s * 0.25; // max lift strength
+        float liftAmount = s * 0.3; // max lift strength
         float shadowMask = 1.0 / (1.0 + exp((lum - 0.25) * 2.0));
         // Darker pixels -> mask ~1, mid -> ~0.5, bright -> ~0
         adjusted = base + liftAmount * shadowMask;
     } else {
         // Deepen shadows smoothly
-        float darkenAmount = abs(s) * 0.4;
+        float darkenAmount = abs(s) * 0.25;
         float shadowMask = pow(lum, 0.6); // preserve highlights
         adjusted = base * (1.0 - darkenAmount * shadowMask);
     }
@@ -560,9 +560,349 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
     float3 finalColor = mix(base, adjusted, mask);
 
     // --- Output ---
-    return float4(finalColor, alpha);
+    return float4(finalColor, alpha);*/
+    
+    /*float2 uv = vert.textureCoordinate;
+    float4 baseColor = inputTexture.sample(textureSampler, uv);
+    float3 base = baseColor.rgb;
+    float alpha = baseColor.a;
 
+    // --- Compute centroid ---
+    float2 centroid = float2(0.0);
+    for (uint i = 0; i < count; i++) centroid += points[i];
+    centroid /= float(count);
 
+    // --- Extended polygon region ---
+    const float topScale    = 0.2;
+    const float bottomScale = 0.1;
+    thread float2 extPoints[128];
+    for (uint i = 0; i < count; i++)
+        extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
 
+    // --- Polygon mask (soft edges) ---
+    float dpoly = signedDistancePolygon(uv, extPoints, count);
+    float edgeSoftness = 0.03;
+    float mask = smoothstep(edgeSoftness, 0.0, dpoly);
+    mask = clamp(mask, 0.0, 1.0);
+
+    // --- Normalize control factor (-100..100 → 0..1) ---
+    float s = clamp(faceScaleFactor / 200.0, 0.0, 1.0); // highlight amount 0–1
+
+    // --- Compute luminance ---
+    float lum = dot(base, float3(0.299, 0.587, 0.114));
+
+    // --- Natural “Highlights” curve (like Core Image’s CIHighlightShadowAdjust) ---
+    float highlightStrength = s * 0.8;  // overall strength
+    float highlightMask = smoothstep(0.5, 1.0, lum); // starts in mid-brights
+    highlightMask = pow(highlightMask, 1.6);          // softer roll-off
+
+    // Lift only highlights while preserving midtone detail
+    float3 lifted = mix(base, float3(1.0), highlightMask * highlightStrength);
+
+    // Gentle contrast recovery so whites aren’t washed out
+    float3 contrastPreserve = mix(lifted, lifted * lifted, 0.25 * s);
+
+    // Clamp and blend by polygon mask
+    float3 adjusted = clamp(contrastPreserve, 0.0, 1.0);
+    float3 finalColor = mix(base, adjusted, mask);
+
+    // Output
+    return float4(finalColor, alpha);*/
+    
+    /*float2 uv = vert.textureCoordinate;
+    float4 baseColor = inputTexture.sample(textureSampler, uv);
+    float3 base = baseColor.rgb;
+    float alpha = baseColor.a;
+
+    // --- Polygon mask ---
+    float2 centroid = float2(0.0);
+    for (uint i = 0; i < count; i++) centroid += points[i];
+    centroid /= float(count);
+
+    const float topScale = 0.2;
+    const float bottomScale = 0.1;
+    thread float2 extPoints[128];
+    for (uint i = 0; i < count; i++)
+        extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
+
+    float dpoly = signedDistancePolygon(uv, extPoints, count);
+    float mask = smoothstep(0.03, 0.0, dpoly);
+    mask = clamp(mask, 0.0, 1.0);
+
+    // --- Slider normalize (-100..100 → -1..1) ---
+    float s = clamp(faceScaleFactor / 400.0, -1.0, 1.0); // higher scaling for visible effect
+
+    // --- Luminance ---
+    float lum = dot(base, float3(0.299, 0.587, 0.114));
+
+    float3 adjusted = base;
+
+    if (s > 0.0) {
+        // Positive: lift highlights like CIHighlightShadowAdjust
+        float highlightMask = smoothstep(0.5, 1.0, lum);
+        highlightMask = pow(highlightMask, 1.5);           // smooth roll-off
+        adjusted = base + highlightMask * s * 0.5;         // lift up to 50%
+    } else if (s < 0.0) {
+        // Negative: subtle midtone darken
+        float darkMask = smoothstep(0.0, 0.7, lum);
+        darkMask = pow(darkMask, 1.4);
+        adjusted = base * (1.0 + s * 0.25 * darkMask);     // s < 0, multiplies <1 → darken
+    }
+
+    // Clamp
+    adjusted = clamp(adjusted, 0.0, 1.0);
+
+    // Blend via polygon mask
+    float3 finalColor = mix(base, adjusted, mask);
+
+    return float4(finalColor, alpha);*/
+    
+    /*float2 uv = vert.textureCoordinate;
+    float4 baseColor = inputTexture.sample(textureSampler, uv);
+    float3 base = baseColor.rgb;
+    float alpha = baseColor.a;
+
+    // --- Polygon mask ---
+    float2 centroid = float2(0.0);
+    for (uint i = 0; i < count; i++) centroid += points[i];
+    centroid /= float(count);
+
+    const float topScale = 0.25;
+    const float bottomScale = 0.2;
+    thread float2 extPoints[128];
+    for (uint i = 0; i < count; i++)
+        extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
+
+    float dpoly = signedDistancePolygon(uv, extPoints, count);
+    float mask = smoothstep(0.04, 0.0, dpoly);
+    mask = clamp(mask, 0.0, 1.0);
+
+    // --- Normalize slider (-100..100 → -1..1) ---
+    float s = clamp(faceScaleFactor / 250.0, -1.0, 1.0);
+
+    // --- Compute luminance ---
+    float lum = dot(base, float3(0.299, 0.587, 0.114));
+
+    // --- Highlights adjustment ---
+    float3 adjusted = base;
+
+    if (s > 0.0) {
+        // Apply lift across all pixels, stronger for brighter pixels
+        float highlightMask = smoothstep(0.2, 1.0, lum);   // starts lifting from midtones
+        highlightMask = pow(highlightMask, 1.2);           // smooth roll-off
+        float liftAmount = s * 0.5;
+        float3 lifted = base + liftAmount * highlightMask * (1.0 - base); // scale by distance to white
+        // Gentle contrast recovery for natural look
+        lifted = mix(lifted, pow(lifted, float3(1.2)), 0.15 * s);
+        adjusted = lifted;
+    } else if (s < 0.0) {
+        // Optional: subtle midtone darken, very low effect
+        float darkMask = smoothstep(0.0, 0.5, lum);
+        darkMask = pow(darkMask, 1.4);
+        adjusted = base * (1.0 + s * 0.25 * darkMask);*/
+        
+       /* float darkMask = smoothstep(0.0, 0.6, lum); // slightly higher range for smoother darkening
+           darkMask = pow(darkMask, 1.3);
+           float darkenAmount = -s * 0.2; // positive scalar
+           float3 darkened = base * (1.0 - darkenAmount * darkMask); // safe, never goes negative
+           adjusted = darkened;
+    }
+
+    // --- Clamp and blend ---
+    adjusted = clamp(adjusted, 0.0, 1.0);
+    float3 finalColor = mix(base, adjusted, mask);
+
+    return float4(finalColor, alpha);*/
+    
+    
+    /*float2 uv = vert.textureCoordinate;
+       float4 baseColor = inputTexture.sample(textureSampler, uv);
+       float3 base = baseColor.rgb;
+       float alpha = baseColor.a;
+
+       // --- Compute centroid ---
+       float2 centroid = float2(0.0);
+       for (uint i = 0; i < count; i++) centroid += points[i];
+       centroid /= float(count);
+
+       // --- Extended polygon region ---
+       const float topScale    = 0.25;
+       const float bottomScale = 0.2;
+       float2 extPoints[64];
+       for (uint i = 0; i < count; i++)
+           extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
+
+       // --- Polygon mask ---
+       float dpoly = signedDistancePolygon(uv, extPoints, count);
+       float mask = smoothstep(0.03, 0.0, dpoly);
+       mask = clamp(mask, 0.0, 1.0);
+
+       // --- Normalize control factor (-100..100 → -1..1) ---
+       float s = clamp(faceScaleFactor / 400.0, -1.0, 1.0);
+
+       // --- Compute luminance ---
+       float lum = dot(base, float3(0.299, 0.587, 0.114));
+
+       // --- Shadow adjustment ---
+       float3 adjusted = base;
+
+       if (s >= 0.0) {
+           // Lift shadows (brightening)
+           float liftAmount = s * 0.3;
+           float shadowMask = 1.0 / (1.0 + exp((lum - 0.25) * 2.0));
+           adjusted = base + liftAmount * shadowMask * (1.0 - base);
+       } else {
+           // Deepen shadows more realistically
+           float darkenAmount = abs(s) * 0.35;
+           float shadowMask   = pow(1.0 - lum, 1.6);
+           float3 darkened    = base - darkenAmount * shadowMask * base;
+           // Add slight contrast recovery to keep image rich
+           darkened = mix(darkened, pow(darkened, float3(0.85)), 0.4 * abs(s));
+           adjusted = darkened;
+       }
+
+       // --- Sharpening (local contrast boost) ---
+       float2 texel = 1.0 / float2(inputTexture.get_width(), inputTexture.get_height());
+       float3 north = inputTexture.sample(textureSampler, uv + float2(0.0, -texel.y)).rgb;
+       float3 south = inputTexture.sample(textureSampler, uv + float2(0.0,  texel.y)).rgb;
+       float3 east  = inputTexture.sample(textureSampler, uv + float2(texel.x, 0.0)).rgb;
+       float3 west  = inputTexture.sample(textureSampler, uv + float2(-texel.x, 0.0)).rgb;
+       float3 blur  = (north + south + east + west + base) / 5.0;
+       float3 highpass = base - blur;
+       float sharpStrength = 0.7 + abs(s) * 0.6; // stronger with darker slider
+       float3 sharpened = adjusted + highpass * sharpStrength;
+       sharpened = clamp(sharpened, 0.0, 1.0);
+
+       // --- Blend using smooth mask ---
+       float3 finalColor = mix(base, sharpened, mask);
+
+       return float4(finalColor, alpha);*/
+    
+    float2 uv = vert.textureCoordinate;
+        float4 baseColor = inputTexture.sample(textureSampler, uv);
+        float3 base = baseColor.rgb;
+        float alpha = baseColor.a;
+
+        // --- Compute centroid ---
+        float2 centroid = float2(0.0);
+        for (uint i = 0; i < count; i++) centroid += points[i];
+        centroid /= float(count);
+
+        // --- Extended polygon region ---
+        const float topScale    = 0.25;
+        const float bottomScale = 0.2;
+        float2 extPoints[64];
+        for (uint i = 0; i < count; i++)
+            extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
+
+        // --- Polygon mask ---
+        float dpoly = signedDistancePolygon(uv, extPoints, count);
+        float mask = smoothstep(0.03, 0.0, dpoly);
+        mask = clamp(mask, 0.0, 1.0);
+
+        // --- Normalize control factor (-100..100 → -1..1) ---
+        float s = clamp(faceScaleFactor / 400.0, -1.0, 1.0);
+
+        // --- Compute luminance ---
+        float lum = dot(base, float3(0.299, 0.587, 0.114));
+
+        // --- Shadow adjustment ---
+        float3 adjusted = base;
+
+        if (s >= 0.0) {
+            // Lift shadows (brightening, softer)
+            float liftAmount = s * 0.3;
+            float shadowMask = smoothstep(0.0, 0.5, 0.4 - lum);
+            adjusted = base + liftAmount * shadowMask * (1.0 - base);
+        } else {
+            // More realistic deep shadows (filmic)
+            float darkenAmount = abs(s) * 0.45; // increased depth
+            float shadowMask   = pow(1.0 - lum, 2.0);
+            float3 darkened    = mix(base, pow(base, float3(1.6)), darkenAmount * shadowMask);
+
+            // Add mild contrast boost for realism
+            float contrast = 1.0 + darkenAmount * 0.6;
+            darkened = ((darkened - 0.5) * contrast + 0.5);
+
+            // Slight saturation drop for cinematic tone
+            float lumDark = dot(darkened, float3(0.299, 0.587, 0.114));
+            darkened = mix(float3(lumDark), darkened, 0.9 - 0.2 * darkenAmount);
+
+            adjusted = darkened;
+        }
+
+        // --- Sharpening (local contrast boost) ---
+        float2 texel = 1.0 / float2(inputTexture.get_width(), inputTexture.get_height());
+        float3 north = inputTexture.sample(textureSampler, uv + float2(0.0, -texel.y)).rgb;
+        float3 south = inputTexture.sample(textureSampler, uv + float2(0.0,  texel.y)).rgb;
+        float3 east  = inputTexture.sample(textureSampler, uv + float2(texel.x, 0.0)).rgb;
+        float3 west  = inputTexture.sample(textureSampler, uv + float2(-texel.x, 0.0)).rgb;
+        float3 blur  = (north + south + east + west + base) / 5.0;
+
+        float3 highpass = base - blur;
+        float sharpStrength = mix(0.7, 1.5, abs(s)); // stronger when darker
+        float3 sharpened = adjusted + highpass * sharpStrength;
+        sharpened = clamp(sharpened, 0.0, 1.0);
+
+        // --- Blend inside region ---
+        float3 finalColor = mix(base, sharpened, mask);
+
+        return float4(finalColor, alpha);
 
 }
+
+
+/*float2 uv = vert.textureCoordinate;
+float4 baseColor = inputTexture.sample(textureSampler, uv);
+float3 base = baseColor.rgb;
+float alpha = baseColor.a;
+
+// --- Compute centroid ---
+float2 centroid = float2(0.0);
+for (uint i = 0; i < count; i++) centroid += points[i];
+centroid /= float(count);
+
+// --- Extended polygon region ---
+const float topScale = 0.2;
+const float bottomScale = 0.1;
+thread float2 extPoints[128];
+for (uint i = 0; i < count; i++)
+    extPoints[i] = extendPoint(points[i], centroid, topScale, bottomScale);
+
+// --- Polygon mask (soft edges) ---
+float dpoly = signedDistancePolygon(uv, extPoints, count);
+float mask = smoothstep(0.03, 0.0, dpoly);
+mask = clamp(mask, 0.0, 1.0);
+
+// --- Normalize slider (-100..100 → -1..1) ---
+float s = clamp(faceScaleFactor / 100.0, -1.0, 1.0); // negative for shadows, positive for highlights
+
+// --- Compute luminance ---
+float lum = dot(base, float3(0.299, 0.587, 0.114));
+
+// --- Highlights / Shadows adjustment ---
+float3 adjusted = base;
+
+if (s > 0.0) {
+    // Lift highlights
+    float highlightMask = smoothstep(0.5, 1.0, lum);   // mid-brights to whites
+    highlightMask = pow(highlightMask, 1.6);           // smooth roll-off
+    adjusted = mix(base, float3(1.0), highlightMask * s * 0.8);
+    // gentle contrast recovery
+    adjusted = mix(adjusted, adjusted * adjusted, 0.25 * s);
+} else if (s < 0.0) {
+    // Deepen shadows
+    float shadowMask = smoothstep(0.0, 0.5, lum);      // dark areas only
+    shadowMask = pow(shadowMask, 0.6);                 // smooth curve
+    float darkenAmount = abs(s) * 0.6;
+    adjusted = base * (1.0 - darkenAmount * (1.0 - shadowMask));
+}
+
+// Clamp to prevent overshoot
+adjusted = clamp(adjusted, 0.0, 1.0);
+
+// --- Blend using polygon mask ---
+float3 finalColor = mix(base, adjusted, mask);
+
+// Output
+return float4(finalColor, alpha);*/

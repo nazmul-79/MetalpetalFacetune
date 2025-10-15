@@ -37,6 +37,7 @@ enum Looks: String, CaseIterable {
     case brighterLips = "Brighter Lips"
     case teethWhitening = "Teeth Whitening"
     case shadow = "Shadow"
+    case highlights = "Highlights"
     case neeckShadow = "Neck Shadow"
 }
 

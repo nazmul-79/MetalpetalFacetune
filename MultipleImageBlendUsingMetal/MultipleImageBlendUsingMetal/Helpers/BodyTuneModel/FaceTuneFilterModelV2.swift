@@ -90,6 +90,7 @@ struct FaceTuneFilterModelV2 {
     var eyeBrowBrightenModel: EyeBrowBrightenFilterModel = .init()
     var neckShadowFilterModel: NeckShadowFilterModel = .init()
     var faceShdowModel: FaceShadowModel = .init()
+    var highlighstModel: FaceHightLightsModel = .init()
     var teethWhitenFilterModel: TeethWhiteningFilterModel = .init()
     var imageSize: CGSize = .zero
     let allCat = FilteryType.allCases
@@ -201,6 +202,14 @@ struct FaceTuneFilterModelV2 {
                 if faceShdowModel.scaleFactor != 0.0 {
                     outputImage = self.applyFaceShadowFilter(image: outputImage)
                 }
+                
+            case .highlights:
+                if category == filterCategory {
+                    highlighstModel.scaleFactor = CGFloat(scaleValue)
+                }
+                if highlighstModel.scaleFactor != 0.0 {
+                    outputImage = self.applyFaceHighlightsFilter(image: outputImage)
+                }
             
             default: break
             }
@@ -226,6 +235,22 @@ extension FaceTuneFilterModelV2 {
 }
 
 extension FaceTuneFilterModelV2 {
+    mutating func applyFaceHighlightsFilter(image: MTIImage) -> MTIImage {
+       
+        let filter = FaceHighLightsFilter()
+        
+        filter.faceScaleFactor = Float(self.highlighstModel.scaleFactor)
+        filter.inputImage = image
+        filter.faceRectCenter = self.faceShdowModel.faceCenter
+        filter.faceRectRadius = self.faceShdowModel.faceRadius
+        filter.rotation = self.faceShdowModel.rotation
+        filter.point = self.faceShdowModel.smoothCurveFast
+        
+        if let outputImage = filter.outputImage {
+            return outputImage
+        }
+        return image
+    }
     mutating func applyFaceShadowFilter(image: MTIImage) -> MTIImage {
        
         let filter = FaceShadowMetalFilter()
@@ -281,6 +306,8 @@ extension FaceTuneFilterModelV2 {
         self.faceShdowModel.faceRadius = faceRadius
         self.faceShdowModel.rotation = 0.0
         self.faceShdowModel.smoothCurveFast = simdPoints
+        
+        self.highlighstModel.scaleFactor = 0.0
     }
 }
 

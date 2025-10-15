@@ -655,8 +655,16 @@ extension FirebaseFaceTuneVC {
             value = self.faceTuneModelV2.eyeBrightnessFilterModel.scaleFactor
         case .teethWhitening:
             value = self.faceTuneModelV2.teethWhiteningModel.scaleFactor
-        default:
-            break
+        case .brighterLips:
+            value = Float(self.faceTuneModelV2.lipsBrighterModel.scaleFactor)
+        case .highlights:
+            value = Float(self.faceTuneModelV2.highlighstModel.scaleFactor)
+        case .shadow:
+            value = Float(self.faceTuneModelV2.faceShdowModel.scaleFactor)
+        case .neeckShadow:
+            value = Float(self.faceTuneModelV2.neckShadowFilterModel.scaleFactor)
+        case .EyeBrows:
+            value = Float(self.faceTuneModelV2.eyeBrowFilterModel.scaleFactor)
         }
         self.centerOriginSlider.value = value
         self.valueShowLabelText.text = "\(value)"
