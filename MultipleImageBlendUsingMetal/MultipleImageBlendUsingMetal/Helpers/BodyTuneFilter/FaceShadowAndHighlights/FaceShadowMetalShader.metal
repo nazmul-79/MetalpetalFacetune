@@ -801,7 +801,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
         mask = clamp(mask, 0.0, 1.0);
 
         // --- Normalize control factor (-100..100 → -1..1) ---
-        float s = clamp(faceScaleFactor / 400.0, -1.0, 1.0);
+        float s = clamp(faceScaleFactor / 350.0, -1.0, 1.0);
 
         // --- Compute luminance ---
         float lum = dot(base, float3(0.299, 0.587, 0.114));

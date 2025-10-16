@@ -231,7 +231,7 @@ fragment float4 FaceHighlightsMetalShader(VertexOut vert [[stage_in]],
     mask = clamp(mask, 0.0, 1.0);
 
     // --- Normalize slider (-100..100 → -1..1) ---
-    float s = clamp(faceScaleFactor / 250.0, -1.0, 1.0);
+    float s = clamp(faceScaleFactor / 200.0, -1.0, 1.0);
 
     // --- Compute luminance ---
     float lum = dot(base, float3(0.299, 0.587, 0.114));
@@ -271,8 +271,6 @@ fragment float4 FaceHighlightsMetalShader(VertexOut vert [[stage_in]],
     float3 finalColor = mix(base, adjusted, mask);
 
     return float4(finalColor, alpha);
-
-
 }
 
 
