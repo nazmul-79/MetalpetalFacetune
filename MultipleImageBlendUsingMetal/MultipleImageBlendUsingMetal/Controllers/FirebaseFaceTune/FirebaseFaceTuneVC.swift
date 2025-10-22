@@ -41,6 +41,7 @@ class FirebaseFaceTuneVC: UIViewController, UIScrollViewDelegate {
     private var currentSelectedLookOption: Looks = .eyeLashesh
     var currentCategory: FeatureCategory = .Shape
     private var selectedIndex = 0
+    private var isProcessing = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -111,31 +112,38 @@ class FirebaseFaceTuneVC: UIViewController, UIScrollViewDelegate {
     }
     
     @IBAction func centerOriginSliderAction(_ sender: CenterOriginSlider) {
-        self.valueShowLabelText.text = "\(Int(sender.value))"
-        guard var orginalImage = self.image else {return}
-       // let img = faceTuneModelV2.applyAllFilter(scaleValue: sender.value,
-                                                // image: orginalImage,
-                                                 //filterName: ShapeOption.eyes.rawValue)
-        
-      
-        //self.convertPointsForFace(self.leftEyePoints, self.boundingBox, value: sender.value)
-        let value = sender.value
-        switch currentCategory {
-        case .Skin:
-            break
-        case .Shape:
-            orginalImage = self.faceTuneModelV2.applyAllFilter(scaleValue: value,
-                                                            image: orginalImage,
-                                                               filterName: self.currentSelectedShapeOption.rawValue) ?? MTIImage.black
-            break
-        case .Look:
-            orginalImage = self.faceTuneModelV2.applyAllFilter(scaleValue: value,
-                                                            image: orginalImage,
-                                                            filterName: self.currentSelectedLookOption.rawValue) ?? MTIImage.black
+        if isProcessing {
+            return
         }
-        
-        DispatchQueue.main.async {
-            self.imageView.image = orginalImage
+        let value =  sender.value
+        self.valueShowLabelText.text = "\(Int(sender.value))"
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard var orginalImage = self.image else {return}
+            self.isProcessing =  true
+            // let img = faceTuneModelV2.applyAllFilter(scaleValue: sender.value,
+            // image: orginalImage,
+            //filterName: ShapeOption.eyes.rawValue)
+            
+            
+            //self.convertPointsForFace(self.leftEyePoints, self.boundingBox, value: sender.value)
+            switch self.currentCategory {
+            case .Skin:
+                break
+            case .Shape:
+                orginalImage = self.faceTuneModelV2.applyAllFilter(scaleValue: value,
+                                                                   image: orginalImage,
+                                                                   filterName: self.currentSelectedShapeOption.rawValue) ?? MTIImage.black
+                break
+            case .Look:
+                orginalImage = self.faceTuneModelV2.applyAllFilter(scaleValue: value,
+                                                                   image: orginalImage,
+                                                                   filterName: self.currentSelectedLookOption.rawValue) ?? MTIImage.black
+            }
+            
+            DispatchQueue.main.async {
+                self.isProcessing =  false
+                self.imageView.image = orginalImage
+            }
         }
     }
     

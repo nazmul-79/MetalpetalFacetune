@@ -11,7 +11,7 @@ using namespace metalpetal;
 // --- Signed distance from a point to polygon ---
 // Negative inside, positive outside
 // --- Extend point for fixed top/bottom ---
-inline float2 extendPoint(float2 p, float2 centroid, float topScale, float bottomScale)
+/*inline float2 extendPoint(float2 p, float2 centroid, float topScale, float bottomScale)
 {
     float2 dir = p - centroid;
     if (dir.y > 0.0) {
@@ -112,7 +112,50 @@ inline float signedDistancePolygon(float2 p, thread const float2 *pts, uint n)
 //
 //       return float4(shadowColor, alpha);
 //}
+*/
 
+inline float sdSegment(float2 p, float2 a, float2 b) {
+    float2 pa = p - a, ba = b - a;
+    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    return length(pa - ba * h);
+}
+
+// --- Extend point vertically based on centroid ---
+inline float2 extendPoint(float2 p, float2 centroid, float topScale, float bottomScale) {
+    float2 dir = normalize(p - centroid);
+    float scale = mix(bottomScale, topScale, step(centroid.y, p.y));
+    return centroid + dir * (1.0 + scale) * length(p - centroid);
+}
+
+// --- Signed distance polygon without array ---
+inline float signedDistancePolygonExtended(float2 uv,
+                                    device const float2 *points,
+                                    uint count,
+                                    float2 centroid,
+                                    float topScale,
+                                    float bottomScale)
+{
+    float minDist = 1e5;
+    float winding = 0.0;
+
+    for (uint i = 0; i < count; i++) {
+        float2 a = extendPoint(points[i], centroid, topScale, bottomScale);
+        float2 b = extendPoint(points[(i + 1) % count], centroid, topScale, bottomScale);
+
+        float segDist = sdSegment(uv, a, b);
+        minDist = min(minDist, segDist);
+
+        // Winding test (inside/outside)
+        if (((a.y <= uv.y) && (b.y > uv.y)) || ((a.y > uv.y) && (b.y <= uv.y))) {
+            float xCross = a.x + (uv.y - a.y) * (b.x - a.x) / (b.y - a.y);
+            if (xCross > uv.x)
+                winding += (b.y > a.y) ? 1.0 : -1.0;
+        }
+    }
+
+    float sign = (fabs(winding) > 0.5) ? -1.0 : 1.0;
+    return minDist * sign;
+}
 
 fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
                             texture2d<float, access::sample> inputTexture [[texture(0)]],
@@ -778,7 +821,7 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
 
        return float4(finalColor, alpha);*/
     
-    float2 uv = vert.textureCoordinate;
+    /*float2 uv = vert.textureCoordinate;
         float4 baseColor = inputTexture.sample(textureSampler, uv);
         float3 base = baseColor.rgb;
         float alpha = baseColor.a;
@@ -847,7 +890,66 @@ fragment float4 FaceShadowMetalShader(VertexOut vert [[stage_in]],
         // --- Blend inside region ---
         float3 finalColor = mix(base, sharpened, mask);
 
-        return float4(finalColor, alpha);
+        return float4(finalColor, alpha);*/
+    
+    float2 uv = vert.textureCoordinate;
+       float4 baseColor = inputTexture.sample(textureSampler, uv);
+       float3 base = baseColor.rgb;
+       float alpha = baseColor.a;
+
+       // --- Compute centroid ---
+       float2 centroid = float2(0.0);
+       for (uint i = 0; i < count; i++) centroid += points[i];
+       centroid /= float(count);
+
+       const float topScale = 0.25;
+       const float bottomScale = 0.2;
+
+       // --- Polygon mask (array-free) ---
+       float dpoly = signedDistancePolygonExtended(uv, points, count, centroid, topScale, bottomScale);
+       float mask = smoothstep(0.03, 0.0, dpoly);
+       mask = clamp(mask, 0.0, 1.0);
+
+       // --- Normalize control factor (-100..100 → -1..1) ---
+       float s = clamp(faceScaleFactor / 350.0, -1.0, 1.0);
+
+       // --- Compute luminance ---
+       float lum = dot(base, float3(0.299, 0.587, 0.114));
+       float3 adjusted = base;
+
+       // --- Shadow / highlight adjustment ---
+       if (s >= 0.0) {
+           float liftAmount = s * 0.3;
+           float shadowMask = smoothstep(0.0, 0.5, 0.4 - lum);
+           adjusted = base + liftAmount * shadowMask * (1.0 - base);
+       } else {
+           float darkenAmount = abs(s) * 0.45;
+           float shadowMask = pow(1.0 - lum, 2.0);
+           float3 darkened = mix(base, pow(base, float3(1.6)), darkenAmount * shadowMask);
+           float contrast = 1.0 + darkenAmount * 0.6;
+           darkened = ((darkened - 0.5) * contrast + 0.5);
+           float lumDark = dot(darkened, float3(0.299, 0.587, 0.114));
+           darkened = mix(float3(lumDark), darkened, 0.9 - 0.2 * darkenAmount);
+           adjusted = darkened;
+       }
+
+       // --- Sharpening (local contrast) ---
+       float2 texel = 1.0 / float2(inputTexture.get_width(), inputTexture.get_height());
+       float3 north = inputTexture.sample(textureSampler, uv + float2(0.0, -texel.y)).rgb;
+       float3 south = inputTexture.sample(textureSampler, uv + float2(0.0,  texel.y)).rgb;
+       float3 east  = inputTexture.sample(textureSampler, uv + float2(texel.x, 0.0)).rgb;
+       float3 west  = inputTexture.sample(textureSampler, uv + float2(-texel.x, 0.0)).rgb;
+       float3 blur  = (north + south + east + west + base) / 5.0;
+
+       float3 highpass = base - blur;
+       float sharpStrength = mix(0.7, 1.5, abs(s));
+       float3 sharpened = adjusted + highpass * sharpStrength;
+       sharpened = clamp(sharpened, 0.0, 1.0);
+
+       // --- Blend inside polygon mask ---
+       float3 finalColor = mix(base, sharpened, mask);
+
+       return float4(finalColor, alpha);
 
 }
 

@@ -640,19 +640,19 @@ extension FaceTuneFilterModelV2 {
         
         let rightEyeLashesupPoint = self.processEyelashesPoints(indices: rightEyeLashesUpIndices,
                                                                 imageSize: self.imageSize,
-                                                                offset: -2)
+                                                                offset: 0)
         
         let rightEyeLashesDownPoint = self.processEyelashesPoints(indices: rightEyeLashesDownIndices,
                                                                 imageSize: self.imageSize,
-                                                                offset: 4)
+                                                                offset: 0)
         
         let leftEyelashesUpPoint = self.processEyelashesPoints(indices: leftEyelashesUpIndices,
                                                                 imageSize: self.imageSize,
-                                                                offset: -2)
+                                                                offset: 0)
         
         let leftEyelashesDownPoint = self.processEyelashesPoints(indices: leftEyelashesDownIndices,
                                                                 imageSize: self.imageSize,
-                                                                offset: 2)
+                                                                offset: 0)
         
         
        /* let rightEyeContourUpIndices: [Int] = [381,380,374,373,390,249,263] //[398, 384, 385, 386, 387, 388, 466]//[33,7, 163, 144, 145, 153, 154,155] //[246,160,161,159,158,157,173] //[33,7, 163, 144, 145, 153, 154,155] //133, 158, 159, 160, 161
